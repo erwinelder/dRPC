@@ -1,7 +1,7 @@
-package com.docta.dRPC.core.result
+package com.docta.drpc.core.result
 
-import com.docta.dRPC.core.result.error.DrpcError
-import com.docta.dRPC.core.result.success.DrpcSuccess
+import com.docta.drpc.core.result.error.DrpcError
+import com.docta.drpc.core.result.success.DrpcSuccess
 import kotlinx.serialization.Serializable
 
 @Serializable

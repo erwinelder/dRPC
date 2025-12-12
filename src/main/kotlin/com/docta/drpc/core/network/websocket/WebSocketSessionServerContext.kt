@@ -1,9 +1,9 @@
-package com.docta.dRPC.core.network.websocket
+package com.docta.drpc.core.network.websocket
 
-import com.docta.dRPC.core.network.receive
-import com.docta.dRPC.core.network.send
-import com.docta.dRPC.core.result.ResultData
-import com.docta.dRPC.core.result.error.DrpcError
+import com.docta.drpc.core.network.receive
+import com.docta.drpc.core.network.send
+import com.docta.drpc.core.result.ResultData
+import com.docta.drpc.core.result.error.DrpcError
 import io.ktor.server.websocket.*
 import kotlinx.serialization.KSerializer
 

@@ -6,6 +6,7 @@ kotlinx-serialization-json-version = "1.9.0"
 # Other
 kotlin-version = "2.2.20"
 logback-version = "1.5.19"
+vanniktech-maven-publish = "0.35.0"
 
 [libraries]
 # Ktor Server
@@ -27,3 +28,4 @@ logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "lo
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }
 ktor = { id = "io.ktor.plugin", version.ref = "ktor-version" }
 kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin-version" }
+vanniktech-maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech-maven-publish" }

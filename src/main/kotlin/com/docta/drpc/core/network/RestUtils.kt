@@ -1,9 +1,9 @@
-package com.docta.dRPC.core.network
+package com.docta.drpc.core.network
 
-import com.docta.dRPC.core.network.websocket.WebSocketSessionClientContext
-import com.docta.dRPC.core.network.websocket.WebSocketSessionContext
-import com.docta.dRPC.core.network.websocket.WebSocketSessionServerContext
-import com.docta.dRPC.core.result.error.DrpcError
+import com.docta.drpc.core.network.websocket.WebSocketSessionClientContext
+import com.docta.drpc.core.network.websocket.WebSocketSessionContext
+import com.docta.drpc.core.network.websocket.WebSocketSessionServerContext
+import com.docta.drpc.core.result.error.DrpcError
 import io.ktor.client.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.client.request.*

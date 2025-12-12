@@ -1,6 +1,6 @@
-package com.docta.dRPC.core.network.websocket
+package com.docta.drpc.core.network.websocket
 
-import com.docta.dRPC.core.result.error.DrpcError
+import com.docta.drpc.core.result.error.DrpcError
 import io.ktor.client.plugins.websocket.*
 
 data class WebSocketSessionClientContext<MD, BD, BE : DrpcError>(

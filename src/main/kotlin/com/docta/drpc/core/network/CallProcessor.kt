@@ -1,4 +1,4 @@
-package com.docta.dRPC.core.network
+package com.docta.drpc.core.network
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement

@@ -42,9 +42,6 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            // Ktor Server
-            implementation(libs.ktor.server.core)
-            implementation(libs.ktor.server.websockets)
             // Ktor Client
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.websockets)
@@ -55,6 +52,9 @@ kotlin {
             implementation(libs.ktor.client.content.negotiation)
         }
         jvmMain.dependencies {
+            // Ktor Server
+            implementation(libs.ktor.server.core)
+            implementation(libs.ktor.server.websockets)
             // Utilities
             implementation(libs.logback.classic)
         }

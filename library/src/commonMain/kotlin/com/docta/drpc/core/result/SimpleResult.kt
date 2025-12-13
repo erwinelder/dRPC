@@ -1,30 +1,29 @@
 package com.docta.drpc.core.result
 
-import com.docta.drpc.core.result.error.DrpcError
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed interface SimpleResult<out E : DrpcError> {
+sealed interface SimpleResult<out E> {
 
     @Serializable
-    class Success<out E : DrpcError>: SimpleResult<E>
+    class Success<out E>: SimpleResult<E>
 
     @Serializable
-    data class Error<out E : DrpcError>(val error: E): SimpleResult<E>
+    data class Error<out E>(val error: E): SimpleResult<E>
 
 
     fun getErrorOrNull(): E? = (this as? Error)?.error
 
 }
 
-inline fun <E : DrpcError> SimpleResult<E>.onSuccess(action: () -> Nothing) {
+inline fun <E> SimpleResult<E>.onSuccess(action: () -> Nothing) {
     if (this is SimpleResult.Success) action()
 }
 
-inline fun <E : DrpcError> SimpleResult<E>.runOnSuccess(action: () -> Unit) {
+inline fun <E> SimpleResult<E>.runOnSuccess(action: () -> Unit) {
     if (this is SimpleResult.Success) action()
 }
 
-inline fun <E : DrpcError> SimpleResult<E>.onError(action: (E) -> Nothing) {
+inline fun <E> SimpleResult<E>.onError(action: (E) -> Nothing) {
     if (this is SimpleResult.Error) action(this.error)
 }

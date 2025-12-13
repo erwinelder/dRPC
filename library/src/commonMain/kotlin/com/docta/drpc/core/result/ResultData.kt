@@ -1,17 +1,15 @@
 package com.docta.drpc.core.result
 
-import com.docta.drpc.core.result.error.DrpcError
-import com.docta.drpc.core.result.success.DrpcSuccess
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed interface ResultData<out D, out E : DrpcError> {
+sealed interface ResultData<out D, out E> {
 
     @Serializable
-    data class Success<out D, out E : DrpcError>(val data: D): ResultData<D, E>
+    data class Success<out D, out E>(val data: D): ResultData<D, E>
 
     @Serializable
-    data class Error<out D, out E : DrpcError>(val error: E): ResultData<D, E>
+    data class Error<out D, out E>(val error: E): ResultData<D, E>
 
 
     fun getDataOrNull(): D? = (this as? Success)?.data
@@ -24,14 +22,14 @@ sealed interface ResultData<out D, out E : DrpcError> {
         }
     }
 
-    fun <R : DrpcError> mapError(transform: (E) -> R): ResultData<D, R> {
+    fun <R> mapError(transform: (E) -> R): ResultData<D, R> {
         return when (this) {
             is Success -> Success(this.data)
             is Error -> Error<D, R>(this.error.let(transform))
         }
     }
 
-    fun <S : DrpcSuccess?> toDefaultResult(success: S): Result<S, E> {
+    fun <S> toDefaultResult(success: S): Result<S, E> {
         return when (this) {
             is Success -> Result.Success(success)
             is Error -> Result.Error(this.error)
@@ -40,13 +38,13 @@ sealed interface ResultData<out D, out E : DrpcError> {
 
 }
 
-inline fun <D, E : DrpcError> ResultData<D, E>.getOrElse(action: (E) -> Nothing): D {
+inline fun <D, E> ResultData<D, E>.getOrElse(action: (E) -> Nothing): D {
     return when (this) {
         is ResultData.Success -> this.data
         is ResultData.Error -> action(this.error)
     }
 }
 
-inline fun <D, E : DrpcError> ResultData<D, E>.onError(action: (E) -> Nothing) {
+inline fun <D, E> ResultData<D, E>.onError(action: (E) -> Nothing) {
     if (this is ResultData.Error) action(this.error)
 }

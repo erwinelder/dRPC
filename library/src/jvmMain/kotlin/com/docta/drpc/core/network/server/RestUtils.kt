@@ -2,7 +2,6 @@ package com.docta.drpc.core.network.server
 
 import com.docta.drpc.core.network.CallProcessor
 import com.docta.drpc.core.network.websocket.WebSocketSessionContext
-import com.docta.drpc.core.result.error.DrpcError
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -39,7 +38,7 @@ inline fun <reified R : Any> Route.processPostRoute(
     }
 }
 
-inline fun <ID, OD, E : DrpcError> Route.processWebSocketRoute(
+inline fun <ID, OD, E> Route.processWebSocketRoute(
     path: String,
     incomingDataSerializer: KSerializer<ID>,
     outgoingDataSerializer: KSerializer<OD>,
@@ -66,7 +65,7 @@ suspend inline fun <reified R : Any> RoutingContext.processPostCall(
         .let { call.respond(it) }
 }
 
-inline fun <ID, OD, E : DrpcError> DefaultWebSocketServerSession.processWebSocketCall(
+inline fun <ID, OD, E> DefaultWebSocketServerSession.processWebSocketCall(
     incomingDataSerializer: KSerializer<ID>,
     outgoingDataSerializer: KSerializer<OD>,
     outgoingErrorSerializer: KSerializer<E>,
@@ -83,7 +82,7 @@ inline fun <ID, OD, E : DrpcError> DefaultWebSocketServerSession.processWebSocke
 }
 
 
-fun <ID, OD, E : DrpcError> WebSocketSessionContext<ID, OD, E>.asServerContext(): WebSocketSessionServerContext<ID, OD, E> {
+fun <ID, OD, E> WebSocketSessionContext<ID, OD, E>.asServerContext(): WebSocketSessionServerContext<ID, OD, E> {
     return this as? WebSocketSessionServerContext ?: throw IllegalStateException(
         "Server service functions working with web sockets must be called in a server context."
     )

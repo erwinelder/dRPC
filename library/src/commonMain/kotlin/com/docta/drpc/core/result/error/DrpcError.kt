@@ -1,3 +1,6 @@
 package com.docta.drpc.core.result.error
 
-interface DrpcError
+import kotlinx.serialization.Serializable
+
+@Serializable
+sealed interface DrpcError

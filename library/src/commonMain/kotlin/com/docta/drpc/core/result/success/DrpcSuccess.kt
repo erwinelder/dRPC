@@ -1,3 +1,6 @@
 package com.docta.drpc.core.result.success
 
-interface DrpcSuccess
+import kotlinx.serialization.Serializable
+
+@Serializable
+sealed interface DrpcSuccess

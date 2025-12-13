@@ -1,7 +1,7 @@
-package com.docta.drpc.core.network.websocket
+package com.docta.drpc.core.network.server
 
-import com.docta.drpc.core.network.receive
 import com.docta.drpc.core.network.send
+import com.docta.drpc.core.network.websocket.WebSocketSessionContext
 import com.docta.drpc.core.result.ResultData
 import com.docta.drpc.core.result.error.DrpcError
 import io.ktor.server.websocket.*

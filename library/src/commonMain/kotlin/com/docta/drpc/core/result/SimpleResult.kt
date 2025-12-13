@@ -24,6 +24,21 @@ sealed interface SimpleResult<out E> {
         }
     }
 
+
+    fun <S> toResult(success: S): Result<S, E> {
+        return when (this) {
+            is Success -> Result.Success(success = success)
+            is Error -> Result.Error(error = error)
+        }
+    }
+
+    fun <D> toResultData(data: D): ResultData<D, E> {
+        return when (this) {
+            is Success -> ResultData.Success(data = data)
+            is Error -> ResultData.Error(error = error)
+        }
+    }
+
 }
 
 inline fun <E> SimpleResult<E>.onSuccess(action: () -> Nothing) {

@@ -1,20 +1,24 @@
 [versions]
+# Android SDK
+android-minSdk = "24"
+android-compileSdk = "36"
 # Ktor
 ktor-version = "3.3.1"
 # Utilities
 kotlinx-serialization-json-version = "1.9.0"
 # Other
-kotlin-version = "2.2.20"
 logback-version = "1.5.19"
+# Plugins
+kotlin-version = "2.2.20"
+android-gradle-plugin = "8.13.2"
 vanniktech-maven-publish = "0.35.0"
 
 [libraries]
 # Ktor Server
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor-version" }
-ktor-server-netty = { module = "io.ktor:ktor-server-netty", version.ref = "ktor-version" }
 ktor-server-websockets = { module = "io.ktor:ktor-server-websockets", version.ref = "ktor-version" }
 # Ktor Client
-ktor-client-cio-jvm = { module = "io.ktor:ktor-client-cio-jvm", version.ref = "ktor-version" }
+ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor-version" }
 ktor-client-websockets = { module = "io.ktor:ktor-client-websockets", version.ref = "ktor-version" }
 # Serialization
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json-version" }
@@ -25,7 +29,7 @@ ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negoti
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback-version" }
 
 [plugins]
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }
-ktor = { id = "io.ktor.plugin", version.ref = "ktor-version" }
+kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin-version" }
+android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "android-gradle-plugin" }
 kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin-version" }
 vanniktech-maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech-maven-publish" }

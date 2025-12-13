@@ -15,24 +15,45 @@ sealed interface ResultData<out D, out E> {
     fun getDataOrNull(): D? = (this as? Success)?.data
     fun getErrorOrNull(): E? = (this as? Error)?.error
 
+
+    fun <DR, ER> map(
+        transformData: (D) -> DR,
+        transformError: (E) -> ER
+    ): ResultData<DR, ER> {
+        return when (this) {
+            is Success -> Success(data = transformData(data))
+            is Error -> Error(error = transformError(error))
+        }
+    }
+
     fun <R> mapData(transform: (D) -> R): ResultData<R, E> {
         return when (this) {
-            is Success -> Success<R, E>(this.data.let(transform))
-            is Error -> Error(this.error)
+            is Success -> Success(data = transform(data))
+            is Error -> Error(error = error)
         }
     }
 
     fun <R> mapError(transform: (E) -> R): ResultData<D, R> {
         return when (this) {
-            is Success -> Success(this.data)
-            is Error -> Error<D, R>(this.error.let(transform))
+            is Success -> Success(data = data)
+            is Error -> Error(error = transform(error))
         }
     }
 
     fun <S> toDefaultResult(success: S): Result<S, E> {
         return when (this) {
-            is Success -> Result.Success(success)
-            is Error -> Result.Error(this.error)
+            is Success -> Result.Success(success = success)
+            is Error -> Result.Error(error = error)
+        }
+    }
+
+    fun fold(
+        onSuccess: (D) -> Unit,
+        onError: (E) -> Unit
+    ) {
+        return when (this) {
+            is Success -> onSuccess(data)
+            is Error -> onError(error)
         }
     }
 
@@ -40,11 +61,23 @@ sealed interface ResultData<out D, out E> {
 
 inline fun <D, E> ResultData<D, E>.getOrElse(action: (E) -> Nothing): D {
     return when (this) {
-        is ResultData.Success -> this.data
-        is ResultData.Error -> action(this.error)
+        is ResultData.Success -> data
+        is ResultData.Error -> action(error)
     }
 }
 
+inline fun <D, E> ResultData<D, E>.onSuccess(action: (D) -> Nothing) {
+    if (this is ResultData.Success) action(data)
+}
+
+inline fun <D, E> ResultData<D, E>.runOnSuccess(action: (D) -> Unit) {
+    if (this is ResultData.Success) action(data)
+}
+
 inline fun <D, E> ResultData<D, E>.onError(action: (E) -> Nothing) {
+    if (this is ResultData.Error) action(error)
+}
+
+inline fun <D, E> ResultData<D, E>.runOnError(action: (E) -> Unit) {
     if (this is ResultData.Error) action(this.error)
 }

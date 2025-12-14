@@ -40,12 +40,6 @@ sealed interface ResultData<out D, out E> {
         }
     }
 
-    fun <S> toDefaultResult(success: S): Result<S, E> {
-        return when (this) {
-            is Success -> Result.Success(success = success)
-            is Error -> Result.Error(error = error)
-        }
-    }
 
     fun fold(
         onSuccess: (D) -> Unit,
@@ -54,6 +48,21 @@ sealed interface ResultData<out D, out E> {
         return when (this) {
             is Success -> onSuccess(data)
             is Error -> onError(error)
+        }
+    }
+
+
+    fun <S> toResult(success: S): Result<S, E> {
+        return when (this) {
+            is Success -> Result.Success(success = success)
+            is Error -> Result.Error(error = error)
+        }
+    }
+
+    fun toSimpleResult(): SimpleResult<E> {
+        return when (this) {
+            is Success -> SimpleResult.Success()
+            is Error -> SimpleResult.Error(error = this.error)
         }
     }
 

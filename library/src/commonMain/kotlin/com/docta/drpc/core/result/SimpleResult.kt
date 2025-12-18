@@ -25,6 +25,23 @@ sealed interface SimpleResult<out E> {
     }
 
 
+    fun fold(
+        onSuccess: () -> Unit,
+        onError: (E) -> Unit
+    ): SimpleResult<E> {
+        return when (this) {
+            is Success -> {
+                onSuccess()
+                this
+            }
+            is Error -> {
+                onError(error)
+                this
+            }
+        }
+    }
+
+
     fun <S> toResult(success: S): Result<S, E> {
         return when (this) {
             is Success -> Result.Success(success = success)

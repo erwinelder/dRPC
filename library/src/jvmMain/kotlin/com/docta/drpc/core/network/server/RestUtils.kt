@@ -1,6 +1,5 @@
 package com.docta.drpc.core.network.server
 
-import com.docta.drpc.core.network.CallProcessor
 import com.docta.drpc.core.network.websocket.WebSocketSessionContext
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -31,7 +30,7 @@ suspend inline fun <T> DefaultWebSocketServerSession.receive(
 
 inline fun <reified R : Any> Route.processPostRoute(
     path: String,
-    crossinline processor: suspend CallProcessor.() -> R
+    crossinline processor: suspend com.docta.drpc.core.network.context.RoutingContext.() -> R
 ): Route {
     return post(path) {
         processPostCall { processor() }
@@ -58,9 +57,12 @@ inline fun <ID, OD, E> Route.processWebSocketRoute(
 
 
 suspend inline fun <reified R : Any> RoutingContext.processPostCall(
-    processor: CallProcessor.() -> R
+    processor: com.docta.drpc.core.network.context.RoutingContext.() -> R
 ) {
-    CallProcessor(parameters = call.receive<Map<String, JsonElement>>())
+    com.docta.drpc.core.network.context.RoutingContext(
+        context = this,
+        parameters = call.receive<Map<String, JsonElement>>()
+    )
         .run { processor() }
         .let { call.respond(it) }
 }

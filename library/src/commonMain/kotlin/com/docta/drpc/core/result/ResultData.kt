@@ -44,10 +44,16 @@ sealed interface ResultData<out D, out E> {
     fun fold(
         onSuccess: (D) -> Unit,
         onError: (E) -> Unit
-    ) {
+    ): ResultData<D, E> {
         return when (this) {
-            is Success -> onSuccess(data)
-            is Error -> onError(error)
+            is Success -> {
+                onSuccess(data)
+                this
+            }
+            is Error -> {
+                onError(error)
+                this
+            }
         }
     }
 

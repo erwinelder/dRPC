@@ -3,13 +3,13 @@
 android-minSdk = "24"
 android-compileSdk = "36"
 # Ktor
-ktor-version = "3.3.1"
+ktor-version = "3.3.3"
 # Utilities
 kotlinx-serialization-json-version = "1.9.0"
 # Other
 logback-version = "1.5.19"
 # Plugins
-kotlin-version = "2.2.20"
+kotlin-version = "2.3.0"
 android-gradle-plugin = "8.13.2"
 vanniktech-maven-publish = "0.35.0"
 

@@ -2,7 +2,7 @@ import com.android.build.api.dsl.androidLibrary
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 group = "io.github.erwinelder"
-version = "0.2.5"
+version = "0.3.0"
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)

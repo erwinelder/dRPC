@@ -30,6 +30,9 @@ sealed class AuthError {
 interface AuthService {
     
     context(ctx: DrpcContext)
+    suspend fun health(): SimpleResult<AuthError>
+    
+    context(ctx: DrpcContext)
     suspend fun signIn(username: String, password: String): ResultData<User, AuthError>
     
     context(ctx: DrpcContext)
@@ -73,6 +76,17 @@ fun verifyUserToken(token: String): Boolean {
 
     return true // token is valid
 }
+
+fun checkAuthServiceHealth(): Boolean {
+    // Check if auth service is healthy (return false if error is present)
+    callCatching {
+        authService.health()
+    }
+        .getOrElse { return false } // extract SimpleResult from Kotlin Result or return false
+        .onError { return false } // return false if error is present
+
+    return true // service is healthy
+}
 ```
 
 ### Calling via HTTP
@@ -89,4 +103,8 @@ curl -X POST http://localhost:8080/AuthService/verifyToken \
     -d '{
         "0": "token_string"
     }'
+    
+curl -X POST http://localhost:8080/AuthService/health \
+    -H "Content-Type: application/json" \
+    -d '{}'
 ```

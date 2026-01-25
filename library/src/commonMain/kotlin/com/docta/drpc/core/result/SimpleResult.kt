@@ -41,6 +41,22 @@ sealed interface SimpleResult<out E> {
         }
     }
 
+    suspend fun foldSuspended(
+        onSuccess: suspend () -> Unit,
+        onError: suspend (E) -> Unit
+    ): SimpleResult<E> {
+        return when (this) {
+            is Success -> {
+                onSuccess()
+                this
+            }
+            is Error -> {
+                onError(error)
+                this
+            }
+        }
+    }
+
 
     fun <S> toResult(success: S): Result<S, E> {
         return when (this) {

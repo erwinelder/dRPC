@@ -16,3 +16,5 @@ dependencyResolutionManagement {
 }
 
 include(":library")
+include(":drpc-ksp-processor")
+include(":test-module")

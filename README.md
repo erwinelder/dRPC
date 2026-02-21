@@ -15,6 +15,30 @@ To map service methods to HTTP endpoints, the following conventions are used:
     - ResultData.Success - if the method executed successfully and has a return value; the 'data' field contains the return value.
     - ResultData.Error - if the method execution failed. The 'error' field contains error details.
 
+## Dependency
+dRPC is published on Maven Central, so you can add it as a dependency in your project using the code below.
+
+### Gradle
+```kotlin
+dependencies {
+    implementation("io.github.erwinelder:drpc:0.3.1")
+}
+```
+
+### Gradle (version catalog)
+```gradle
+[versions]
+drpc-version = "0.3.1"
+
+[libraries]
+drpc = { module = "io.github.erwinelder:drpc", version.ref = "drpc-version" }
+```
+```kotlin
+dependencies {
+    implementation(libs.drpc)
+}
+```
+
 ## Examples
 
 ### Interface definition

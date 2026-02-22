@@ -1,4 +1,4 @@
-package com.docta.drpc.kspProcessor
+package com.docta.drpc.processor
 
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment

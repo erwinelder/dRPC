@@ -1,5 +1,6 @@
 package com.docta.drpc.test
 
+import com.docta.drpc.server.installDrpc
 import com.docta.drpc.test.config.configureDI
 import com.docta.drpc.test.config.configureSerialization
 import com.docta.drpc.test.di.mainModule
@@ -20,6 +21,7 @@ fun main() {
 fun Application.appModule() {
     configureSerialization()
     configureDI(mainModule)
+    installDrpc()
 
     configureRouting()
 }

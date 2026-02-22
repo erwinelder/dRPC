@@ -1,15 +1,15 @@
-package com.docta.drpc.kspProcessor
+package com.docta.drpc.processor.core.model
 
 import kotlin.reflect.KClass
 
-data class ContextTypeInfo(
+data class ContextMetadata(
     val qualifiedName: String,
     val simpleName: String
 ) {
     companion object {
 
-        fun fromKClass(kClass: KClass<*>): ContextTypeInfo {
-            return ContextTypeInfo(
+        fun fromKClass(kClass: KClass<*>): ContextMetadata {
+            return ContextMetadata(
                 qualifiedName = kClass.qualifiedName ?: error("KClass must have a qualified name"),
                 simpleName = kClass.simpleName ?: error("KClass must have a simple name")
             )

@@ -1,3 +1,6 @@
+group = "io.github.erwinelder"
+version = "0.3.1"
+
 plugins {
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.android.kotlin.multiplatform.library) apply false

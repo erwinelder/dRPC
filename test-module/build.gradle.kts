@@ -6,8 +6,9 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":library"))
-    ksp(project(":drpc-ksp-processor"))
+    implementation(project(":drpc-core"))
+    implementation(project(":drpc-server"))
+    ksp(project(":drpc-processor-core"))
 
     // Ktor Server
     implementation(libs.ktor.server.core)

@@ -9,7 +9,7 @@ dependencies {
     implementation(project(":drpc-core"))
     implementation(project(":drpc-client"))
     implementation(project(":drpc-server"))
-    ksp(project(":drpc-processor-core"))
+    ksp(project(":drpc-processor"))
 
     // Ktor Server
     implementation(libs.ktor.server.core)

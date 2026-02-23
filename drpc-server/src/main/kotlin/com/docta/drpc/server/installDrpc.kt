@@ -8,7 +8,7 @@ fun Application.installDrpc() {
     DrpcInstallerHolder.installer?.install(this)
         ?: error(
             "dRPC installer was not found.\n" +
-                    "Make sure you applied drpc-processor-server via KSP in this module and rebuild."
+                    "Make sure you applied 'drpc-processor-server' or 'drpc-processor' via KSP in this module and rebuild."
         )
 }
 

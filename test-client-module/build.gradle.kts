@@ -87,5 +87,5 @@ android {
 }
 
 dependencies {
-    add("kspCommonMainMetadata", project(":drpc-processor-core"))
+    add("kspCommonMainMetadata", project(":drpc-processor-client"))
 }

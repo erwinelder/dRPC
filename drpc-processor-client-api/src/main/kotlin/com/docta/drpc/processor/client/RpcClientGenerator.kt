@@ -20,7 +20,7 @@ object RpcClientGenerator {
         dependencies: Dependencies
     ) {
         val controllerImplName = "${serviceMetadata.controllerName}Impl"
-        val contextMetadata = ContextMetadata.fromKClass(kClass = DrpcContext::class)
+        val contextMetadata = ContextMetadata.Companion.fromKClass(kClass = DrpcContext::class)
 
         val imports = functions.collectImportQualifiedNames() + setOf(
             contextMetadata.qualifiedName,

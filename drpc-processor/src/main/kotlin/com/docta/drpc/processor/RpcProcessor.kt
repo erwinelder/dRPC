@@ -21,7 +21,7 @@ class RpcProcessor(
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val (services, invalidSymbols) = resolver.getRpcServices()
 
-        services.forEach { it.generateServiceControllerWithImpl() }
+        services.forEach { it.generateCode() }
 
         RpcServerGenerator.generateInstaller(
             codeGenerator = codeGenerator,
@@ -31,7 +31,7 @@ class RpcProcessor(
         return invalidSymbols
     }
 
-    private fun KSClassDeclaration.generateServiceControllerWithImpl() {
+    private fun KSClassDeclaration.generateCode() {
         val serviceMetadata = ServiceMetadata.fromService(service = this)
         val baseHttpUrl = getServiceBaseHttpUrl()
         val functions = getServiceFunctions()

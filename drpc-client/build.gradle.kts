@@ -13,7 +13,7 @@ plugins {
 kotlin {
     jvm()
     androidLibrary {
-        namespace = "com.docta.drpc"
+        namespace = "com.docta.drpc.client"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
 
@@ -39,6 +39,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            api(project(":drpc-core"))
+
             // Ktor Client
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.websockets)
@@ -71,7 +73,7 @@ mavenPublishing { // TODO
 
     signAllPublications()
 
-    coordinates(group.toString(), "drpc", version.toString())
+    coordinates(group.toString(), "drpc.client", version.toString())
 
     pom {
         name = "dRPC"

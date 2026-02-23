@@ -22,4 +22,5 @@ include(":drpc-processor-core")
 include(":drpc-processor-client")
 include(":drpc-processor-server")
 
-include(":test-module")
+include(":test-client-module")
+include(":test-server-module")

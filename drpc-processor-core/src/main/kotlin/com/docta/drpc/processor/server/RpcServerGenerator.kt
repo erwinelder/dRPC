@@ -20,8 +20,8 @@ object RpcServerGenerator {
         val imports = setOf(
             "io.ktor.server.routing.Routing",
             "io.ktor.server.routing.route",
-            "com.docta.drpc.core.network.server.processPostRoute",
-            "com.docta.drpc.server.RpcBinder",
+            "com.docta.drpc.server.network.processPostRoute",
+            "com.docta.drpc.server.service.RpcBinder",
             serviceMetadata.serviceQualifiedName,
             serviceMetadata.controllerQualifiedName
         )
@@ -109,6 +109,7 @@ object RpcServerGenerator {
                 "io.ktor.server.application.Application",
                 "com.docta.drpc.server.DrpcInstaller",
                 "com.docta.drpc.server.DrpcInstallerHolder",
+                "com.docta.drpc.server.service.RpcRegistry",
                 service.serviceQualifiedName,
                 service.binderQualifiedName
             )

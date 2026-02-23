@@ -2,6 +2,7 @@
 # Android SDK
 android-minSdk = "24"
 android-compileSdk = "36"
+android-targetSdk = "36"
 # Ktor
 ktor-version = "3.4.0"
 # Koin
@@ -15,6 +16,7 @@ kotlin-version = "2.3.10"
 android-gradle-plugin = "8.13.2"
 vanniktech-maven-publish = "0.35.0"
 ksp = "2.3.6"
+compose-plugin = "1.9.3"
 
 [libraries]
 # Ktor Server
@@ -41,7 +43,10 @@ ksp-symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processin
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin-version" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin-version" }
-android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "android-gradle-plugin" }
 kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin-version" }
 vanniktech-maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech-maven-publish" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+kotlin-plugin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin-version" }
+jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
+android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "android-gradle-plugin" }
+android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }

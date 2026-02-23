@@ -22,12 +22,12 @@ object RpcClientGenerator {
         val controllerImplName = "${serviceMetadata.controllerName}Impl"
         val contextMetadata = ContextMetadata.fromKClass(kClass = DrpcContext::class)
 
-        val imports = functions.collectImportQualifiedNames().toMutableSet().apply {
-            add(contextMetadata.qualifiedName)
-            add("com.docta.drpc.core.network.client.callPost")
-            add("com.docta.drpc.core.network.asCallParameter")
-            add("io.ktor.client.HttpClient")
-        }
+        val imports = functions.collectImportQualifiedNames() + setOf(
+            contextMetadata.qualifiedName,
+            "com.docta.drpc.client.network.asCallParameter",
+            "com.docta.drpc.client.network.callPost",
+            "io.ktor.client.HttpClient"
+        )
 
         val out = codeGenerator.createNewFile(
             dependencies = dependencies,

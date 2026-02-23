@@ -15,6 +15,7 @@ dependencyResolutionManagement {
     }
 }
 
+include(":drpc")
 include(":drpc-core")
 include(":drpc-client")
 include(":drpc-server")

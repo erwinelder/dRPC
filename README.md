@@ -21,21 +21,45 @@ dRPC is published on Maven Central, so you can add it as a dependency in your pr
 ### Gradle
 ```kotlin
 dependencies {
-    implementation("io.github.erwinelder:drpc:0.3.1")
+    // For both client and server APIs:
+    implementation("io.github.erwinelder:drpc:0.4.0")
+    ksp("io.github.erwinelder:drpc-processor:0.4.0")
+    // For client API only:
+    implementation("io.github.erwinelder:drpc-client:0.4.0")
+    ksp("io.github.erwinelder:drpc-client-processor:0.4:0")
+    // For server API only:
+    implementation("io.github.erwinelder:drpc-server:0.4.0")
+    ksp("io.github.erwinelder:drpc-server-processor:0.4:0")
 }
 ```
 
 ### Gradle (version catalog)
 ```gradle
 [versions]
-drpc-version = "0.3.1"
+drpc-version = "0.4.0"
 
 [libraries]
+# For both client and server APIs:
 drpc = { module = "io.github.erwinelder:drpc", version.ref = "drpc-version" }
+drpc-processor = { module = "io.github.erwinelder:drpc-processor", version.ref = "drpc-version" }
+# For client API only:
+drpc-client = { module = "io.github.erwinelder:drpc-client", version.ref = "drpc-version" }
+drpc-client-processor = { module = "io.github.erwinelder:drpc-client-processor", version.ref = "drpc-version" }
+# For server API only:
+drpc-server = { module = "io.github.erwinelder:drpc-server", version.ref = "drpc-version" }
+drpc-server-processor = { module = "io.github.erwinelder:drpc-server-processor", version.ref = "drpc-version" }
 ```
 ```kotlin
 dependencies {
+    // For both client and server APIs:
     implementation(libs.drpc)
+    ksp(libs.drpc.processor)
+    // For client API only:
+    implementation(libs.drpc.client)
+    ksp(libs.drpc.client.processor)
+    // For server API only:
+    implementation(libs.drpc.server)
+    ksp(libs.drpc.server.processor)
 }
 ```
 
@@ -44,6 +68,7 @@ dependencies {
 ### Interface definition
 
 ```kotlin
+// Define error class
 @Serializable
 sealed class AuthError {
     @Serializable object ServiceNotAvailable : NodeError()
@@ -51,8 +76,11 @@ sealed class AuthError {
     @Serializable object TokenExpired : AuthError()
 }
 
+// Annotate the service interface with @Rpc and specify the base HTTP URL for the service (essential)
+@Rpc(serviceBaseHttpUrl = "http://0.0.0.0:8080")
 interface AuthService {
     
+    // Use context receiver for each method to get access to dRPC context in service methods (essential)
     context(ctx: DrpcContext)
     suspend fun health(): SimpleResult<AuthError>
     
@@ -65,7 +93,7 @@ interface AuthService {
 }
 ```
 
-### Calling from code
+### Calling from the client side
 
 ```kotlin
 fun getUserData(username: String, password: String): ResultData<User, AuthError> {
@@ -110,6 +138,43 @@ fun checkAuthServiceHealth(): Boolean {
         .onError { return false } // return false if error is present
 
     return true // service is healthy
+}
+```
+
+### Setting up the server side
+
+```kotlin
+fun main() {
+    embeddedServer(
+        factory = Netty,
+        port = System.getenv("PORT")?.toIntOrNull() ?: 8080,
+        host = "0.0.0.0",
+        module = Application::appModule
+    ).start(wait = true)
+}
+
+fun Application.appModule() {
+    // ... set up your dependencies and other configurations
+    
+    // Configure content negotiation to use JSON serialization for request and response bodies
+    configureSerialization()
+    // Install dRPC plugin for Ktor in order to bind service interfaces to HTTP endpoints
+    installDrpc()
+    
+    configureRouting()
+}
+
+fun Application.configureSerialization() {
+    install(ContentNegotiation) {
+        json()
+    }
+}
+
+fun Application.configureRouting() {
+    routing {
+        // Register the service providing an actual implementation of the service interface (essential)
+        registerService<AuthService> { AuthServiceImpl() }
+    }
 }
 ```
 

@@ -6,6 +6,9 @@ build/
 
 ### IntelliJ IDEA ###
 .idea/
+!.idea/icon.svg
+!.idea/fileColors.xml
+!.idea/scopes
 *.iws
 *.iml
 *.ipr

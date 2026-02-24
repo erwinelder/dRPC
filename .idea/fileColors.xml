@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SharedFileColors">
+    <fileColor scope="drpc-processor" color="Blue" />
+    <fileColor scope="drpc-processor-client" color="Green" />
+    <fileColor scope="drpc-processor-core" color="Violet" />
+    <fileColor scope="drpc-server" color="Rose" />
+    <fileColor scope="drpc-client" color="Green" />
+    <fileColor scope="drpc-core" color="Violet" />
+    <fileColor scope="drpc" color="Blue" />
+  </component>
+</project>

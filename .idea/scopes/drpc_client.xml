@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="drpc-client" pattern="file[drpc.drpc-client*]:*//*" />
+</component>

@@ -39,11 +39,11 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(project(":drpc-core"))
-            implementation(project(":drpc-client"))
+            api(project(":drpc-core"))
+            api(project(":drpc-client"))
         }
         jvmMain.dependencies {
-            implementation(project(":drpc-server"))
+            api(project(":drpc-server"))
         }
     }
 }

@@ -6,9 +6,10 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":drpc-core"))
-    implementation(project(":drpc-client"))
-    implementation(project(":drpc-server"))
+    implementation(project(":drpc"))
+//    implementation(project(":drpc-core"))
+//    implementation(project(":drpc-client"))
+//    implementation(project(":drpc-server"))
     ksp(project(":drpc-processor"))
 
     // Ktor Server

@@ -39,7 +39,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(project(":drpc-core"))
+            api(project(":drpc-core"))
 
             // Ktor Client
             implementation(libs.ktor.client.core)

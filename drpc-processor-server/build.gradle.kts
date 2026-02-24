@@ -6,8 +6,8 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":drpc-processor-core-api"))
-    implementation(project(":drpc-processor-server-api"))
+    api(project(":drpc-processor-core-api"))
+    api(project(":drpc-processor-server-api"))
 
     // Utilities
     implementation(libs.ksp.symbol.processing.api)

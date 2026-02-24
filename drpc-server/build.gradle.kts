@@ -35,7 +35,7 @@ mavenPublishing {
 
     pom {
         name = "dRPC Client"
-        description = "Docta Remote Procedure call (Server) built on top of Kotlin/Ktor."
+        description = "Docta Remote Procedure Call (Server) built on top of Kotlin/Ktor."
         inceptionYear = "2025"
         url = "https://github.com/erwinelder/dRPC/"
         licenses {

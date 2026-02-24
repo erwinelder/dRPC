@@ -1,5 +1,7 @@
-group = "io.github.erwinelder"
-version = "0.4.0"
+allprojects {
+    group = "io.github.erwinelder"
+    version = "0.4.0"
+}
 
 plugins {
     alias(libs.plugins.kotlin.jvm) apply false

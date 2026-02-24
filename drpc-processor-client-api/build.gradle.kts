@@ -3,8 +3,8 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":drpc-core"))
-    implementation(project(":drpc-processor-core-api")) // TODO: maybe change to api
+    api(project(":drpc-core"))
+    api(project(":drpc-processor-core-api"))
 
     implementation(libs.ksp.symbol.processing.api)
 }

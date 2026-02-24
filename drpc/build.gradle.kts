@@ -39,11 +39,11 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(project(":drpc-core"))
-            api(project(":drpc-client"))
+            implementation(project(":drpc-core"))
+            implementation(project(":drpc-client"))
         }
         jvmMain.dependencies {
-            api(project(":drpc-server"))
+            implementation(project(":drpc-server"))
         }
     }
 }
@@ -56,16 +56,16 @@ signing {
     sign(publishing.publications)
 }
 
-mavenPublishing { // TODO
+mavenPublishing {
     publishToMavenCentral()
 
     signAllPublications()
 
-    coordinates(group.toString(), "drpc", version.toString())
+    coordinates(groupId = group.toString(), artifactId = "drpc", version = version.toString())
 
     pom {
         name = "dRPC"
-        description = "Docta Remote Procedure call build on top of Kotlin/Ktor."
+        description = "Docta Remote Procedure call built on top of Kotlin/Ktor."
         inceptionYear = "2025"
         url = "https://github.com/erwinelder/dRPC/"
         licenses {

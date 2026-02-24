@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":drpc-processor-core-api")) // TODO: maybe change to api
+    api(project(":drpc-processor-core-api"))
 
     // Ktor Server
     implementation(libs.ktor.server.core)

@@ -7,8 +7,6 @@ plugins {
 dependencies {
     implementation(project(":drpc-core"))
 
-    // Ktor Server
-    implementation(libs.ktor.server.core) // TODO: remove if needed
     // Utilities
     implementation(libs.ksp.symbol.processing.api)
 }

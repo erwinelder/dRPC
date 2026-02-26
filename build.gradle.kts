@@ -1,6 +1,6 @@
 allprojects {
     group = "io.github.erwinelder"
-    version = "0.4.1"
+    version = "0.4.2"
 }
 
 plugins {

@@ -20,7 +20,7 @@ object RpcClientGenerator {
         dependencies: Dependencies
     ) {
         val controllerImplName = "${serviceMetadata.controllerName}Impl"
-        val contextMetadata = ContextMetadata.Companion.fromKClass(kClass = DrpcContext::class)
+        val contextMetadata = ContextMetadata.fromKClass(kClass = DrpcContext::class)
 
         val imports = functions.collectImportQualifiedNames() + setOf(
             contextMetadata.qualifiedName,
@@ -39,6 +39,7 @@ object RpcClientGenerator {
             w.writePackageAndImports(packageName = serviceMetadata.packageName, imports = imports)
 
             w.appendLine("class ${controllerImplName}(")
+            w.appendLine("    override val serviceBaseHttpUrl: String,")
             w.appendLine("    private val httpClient: HttpClient")
 //            w.appendLine("    private val webSocketClient: HttpClient") // TODO-websocket-support
             w.appendLine(") : ${serviceMetadata.controllerName} {")

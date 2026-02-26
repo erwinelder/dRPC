@@ -4,7 +4,6 @@ import com.docta.drpc.processor.client.RpcClientGenerator
 import com.docta.drpc.processor.core.RpcCoreGenerator
 import com.docta.drpc.processor.core.model.ServiceMetadata
 import com.docta.drpc.processor.core.utils.getRpcServices
-import com.docta.drpc.processor.core.utils.getServiceBaseHttpUrl
 import com.docta.drpc.processor.core.utils.getServiceDependencies
 import com.docta.drpc.processor.core.utils.getServiceFunctions
 import com.docta.drpc.processor.server.RpcServerGenerator
@@ -33,14 +32,12 @@ class RpcProcessor(
 
     private fun KSClassDeclaration.generateCode() {
         val serviceMetadata = ServiceMetadata.fromService(service = this)
-        val baseHttpUrl = getServiceBaseHttpUrl()
         val functions = getServiceFunctions()
         val dependencies = getServiceDependencies()
 
         RpcCoreGenerator.generateController(
             codeGenerator = codeGenerator,
             serviceMetadata = serviceMetadata,
-            baseHttpUrl = baseHttpUrl,
             functions = functions,
             dependencies = dependencies
         )

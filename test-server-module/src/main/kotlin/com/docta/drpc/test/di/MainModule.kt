@@ -26,7 +26,10 @@ val mainModule = module {
     /* ---------- Services ---------- */
 
     single<TestService> {
-        TestRestControllerImpl(httpClient = get(qualifier = named(enum = HttpClientType.Http)))
+        TestRestControllerImpl(
+            serviceBaseHttpUrl = "http://0.0.0.0:8080",
+            httpClient = get(qualifier = named(enum = HttpClientType.Http))
+        )
     }
 
 }

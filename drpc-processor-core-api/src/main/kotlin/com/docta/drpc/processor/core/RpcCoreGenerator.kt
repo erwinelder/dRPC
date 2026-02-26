@@ -10,7 +10,6 @@ object RpcCoreGenerator {
     fun generateController(
         codeGenerator: CodeGenerator,
         serviceMetadata: ServiceMetadata,
-        baseHttpUrl: String,
         functions: List<KSFunctionDeclaration>,
         dependencies: Dependencies
     ) {
@@ -26,8 +25,7 @@ object RpcCoreGenerator {
 
             w.appendLine("interface ${serviceMetadata.controllerName} : ${serviceMetadata.serviceName} {")
             w.appendLine()
-            w.appendLine("    val serviceBaseHttpUrl: String")
-            w.appendLine("        get() = \"$baseHttpUrl\"")
+            w.appendLine("    abstract val serviceBaseHttpUrl: String")
             w.appendLine()
             w.appendLine("    val serviceRoute: String")
             w.appendLine("        get() = \"/${serviceMetadata.baseName}\"")

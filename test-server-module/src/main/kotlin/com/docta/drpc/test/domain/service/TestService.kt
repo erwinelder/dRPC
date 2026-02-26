@@ -5,7 +5,7 @@ import com.docta.drpc.core.network.context.DrpcContext
 import com.docta.drpc.core.result.SimpleResult
 import com.docta.drpc.test.domain.model.result.error.PizzaError
 
-@Rpc(serviceBaseHttpUrl = "http://0.0.0.0:8080")
+@Rpc
 interface TestService {
 
     context(context: DrpcContext)

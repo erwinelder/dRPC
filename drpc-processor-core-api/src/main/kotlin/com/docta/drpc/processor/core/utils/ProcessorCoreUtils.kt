@@ -23,22 +23,6 @@ fun Resolver.getRpcServices(): Pair<List<KSClassDeclaration>, List<KSAnnotated>>
 }
 
 
-fun KSClassDeclaration.getServiceBaseHttpUrl(): String {
-    return getServiceBaseHttpUrlOrNull()
-        ?: error("@Rpc(serviceBaseHttpUrl) is required and must be non-blank for ${simpleName.asString()}")
-}
-
-fun KSClassDeclaration.getServiceBaseHttpUrlOrNull(): String? {
-    return annotations
-        .firstOrNull { it.shortName.asString() == "Rpc" }
-        ?.arguments
-        ?.firstOrNull { it.name?.asString() == "serviceBaseHttpUrl" }
-        ?.value
-        ?.toString()
-        ?.takeIf { it.isNotBlank() }
-}
-
-
 fun KSClassDeclaration.getServiceDependencies(): Dependencies {
     return Dependencies(
         aggregating = false,

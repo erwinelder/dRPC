@@ -162,6 +162,7 @@ object RpcClientGenerator {
             .reduceOrNull { acc, string ->
                 if (acc == string) acc else acc.take(acc.commonPrefixWith(string).length)
             }
+            ?.removeSuffix(".")
             ?.takeIf { it.isNotBlank() }
             ?: "com.docta.drpc.client"
         val installerPackage = "$installerPackagePrefix.drpc.generated"

@@ -134,8 +134,6 @@ object RpcClientGenerator {
         targetEnvironment: DrpcTargetEnvironment,
         services: List<KSClassDeclaration>
     ) {
-        val installerPackage = "com.docta.drpc.client"
-
         val servicesMetadata = mutableListOf<ServiceMetadata>()
         val containingFiles = mutableListOf<KSFile>()
 
@@ -148,8 +146,7 @@ object RpcClientGenerator {
         generateClientFactoryRegistry(
             codeGenerator = codeGenerator,
             targetEnvironment = targetEnvironment,
-            installerPackage = installerPackage,
-            services = servicesMetadata,
+            servicesMetadata = servicesMetadata,
             containingFiles = containingFiles
         )
     }
@@ -157,19 +154,30 @@ object RpcClientGenerator {
     fun generateClientFactoryRegistry(
         codeGenerator: CodeGenerator,
         targetEnvironment: DrpcTargetEnvironment,
-        installerPackage: String,
-        services: List<ServiceMetadata>,
+        servicesMetadata: List<ServiceMetadata>,
         containingFiles: List<KSFile>
     ) {
-        if (services.isEmpty()) return
+        val installerPackagePrefix = servicesMetadata
+            .map { it.packageName }
+            .reduceOrNull { acc, string ->
+                if (acc == string) acc else acc.take(acc.commonPrefixWith(string).length)
+            }
+            ?.takeIf { it.isNotBlank() }
+            ?: "com.docta.drpc.client"
+        val installerPackage = "$installerPackagePrefix.drpc.generated"
+        val installerPackagePrefixSnakeCase = installerPackagePrefix.replace(".", "_")
+
+        if (servicesMetadata.isEmpty()) return
 
         val registryFileName = "DrpcClientFactoryRegistryGenerated"
 
-        val imports = services.flatMap { service ->
+        val imports = servicesMetadata.flatMap { service ->
             setOfNotNull(
                 "kotlin.native.EagerInitialization".takeIf { targetEnvironment == DrpcTargetEnvironment.Ios },
                 "kotlin.OptIn".takeIf { targetEnvironment == DrpcTargetEnvironment.Ios },
                 "kotlin.ExperimentalStdlibApi".takeIf { targetEnvironment == DrpcTargetEnvironment.Ios },
+                "com.docta.drpc.client.DrpcClientFactoryRegistryProvider",
+                "com.docta.drpc.client.DrpcClientFactories",
                 service.serviceQualifiedName,
                 service.clientFactoryQualifiedName
             )
@@ -189,24 +197,74 @@ object RpcClientGenerator {
         out.writer().use { w ->
             w.writePackageAndImports(packageName = installerPackage, imports = imports)
 
-            w.appendLine("@Suppress(\"unused\")")
-            w.appendLine("object DrpcClientFactoryRegistryGenerated {")
-            w.appendLine()
-            w.appendLine("    init {")
-            services.forEach { s ->
-                w.appendLine("        DrpcClientFactories.map[${s.serviceName}::class] =")
-                w.appendLine("            ${s.clientFactoryName}")
-            }
-            w.appendLine("    }")
-            w.appendLine()
-            w.appendLine("}")
-            w.appendLine()
-            if (targetEnvironment == DrpcTargetEnvironment.Ios) {
-                w.appendLine("@OptIn(ExperimentalStdlibApi::class)")
-                w.appendLine("@EagerInitialization")
-                w.appendLine("private val __drpcClientFactoriesInit = DrpcClientFactoryRegistryGenerated")
+            if (targetEnvironment == DrpcTargetEnvironment.Android || targetEnvironment == DrpcTargetEnvironment.Jvm) {
+                w.appendLine("@Suppress(\"unused\")")
+                w.appendLine("class DrpcClientFactoryRegistryGenerated : DrpcClientFactoryRegistryProvider {")
+                w.appendLine()
+                w.appendLine("    override fun install() {")
+                servicesMetadata.forEach { s ->
+                    w.appendLine("        DrpcClientFactories.register(")
+                    w.appendLine("            service = ${s.serviceName}::class,")
+                    w.appendLine("            factory = ${s.clientFactoryName}")
+                    w.appendLine("        )")
+                }
+                w.appendLine("    }")
+                w.appendLine()
+                w.appendLine("}")
                 w.appendLine()
             }
+            if (targetEnvironment == DrpcTargetEnvironment.Ios) {
+                val registerFunName = "__drpcRegisterClientFactories_$installerPackagePrefixSnakeCase"
+                val initValName = "__drpcClientFactoriesInit_$installerPackagePrefixSnakeCase"
+                w.appendLine("@OptIn(ExperimentalStdlibApi::class)")
+                w.appendLine("internal fun $registerFunName() {")
+                servicesMetadata.forEach { s ->
+                    w.appendLine("    DrpcClientFactories.register(")
+                    w.appendLine("        service = ${s.serviceName}::class,")
+                    w.appendLine("        factory = ${s.clientFactoryName}")
+                    w.appendLine("    )")
+                }
+                w.appendLine("}")
+                w.appendLine()
+                w.appendLine("@EagerInitialization")
+                w.appendLine("private val $initValName = run {")
+                w.appendLine("    $registerFunName()")
+                w.appendLine("}")
+                w.appendLine()
+            }
+        }
+
+        if (targetEnvironment == DrpcTargetEnvironment.Android || targetEnvironment == DrpcTargetEnvironment.Jvm) {
+            generateClientFactoryRegistryProviderResource(
+                codeGenerator = codeGenerator,
+                containingFiles = containingFiles,
+                providerFqn = "$installerPackage.$registryFileName"
+            )
+        }
+    }
+
+    private fun generateClientFactoryRegistryProviderResource(
+        codeGenerator: CodeGenerator,
+        containingFiles: List<KSFile>,
+        providerFqn: String
+    ) {
+        val dependencies = Dependencies(
+            aggregating = true,
+            sources = containingFiles.distinct().toTypedArray()
+        )
+        val registryFqn = "com.docta.drpc.client.DrpcClientFactoryRegistryProvider"
+        val serviceFilePath = "META-INF/services/$registryFqn"
+
+        val file = runCatching {
+            codeGenerator.createNewFileByPath(
+                dependencies = dependencies,
+                path = serviceFilePath,
+                extensionName = ""
+            )
+        }.getOrNull() ?: return // If the file already exists, we can assume it's identical and skip writing it again
+
+        file.writer().use { w ->
+            w.appendLine(providerFqn)
         }
     }
 

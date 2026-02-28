@@ -1,6 +1,16 @@
 package com.docta.drpc.client
 
+import java.util.*
+
+@Volatile
+private var installed = false
+
 actual fun tryLoadGeneratedClientFactoryRegistry() {
-    val fqn = "com.docta.drpc.client.DrpcClientFactoryRegistryGenerated"
-    runCatching { Class.forName(fqn) }
+    if (installed) return
+
+    synchronized(DrpcClientFactories) {
+        if (installed) return
+        ServiceLoader.load(DrpcClientFactoryRegistryProvider::class.java).forEach { it.install() }
+        installed = true
+    }
 }

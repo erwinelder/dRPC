@@ -1,11 +1,24 @@
 package com.docta.drpc.processor.core.utils
 
 import com.docta.drpc.core.annotation.Rpc
+import com.docta.drpc.processor.core.DrpcTargetEnvironment
 import com.google.devtools.ksp.processing.Dependencies
+import com.google.devtools.ksp.processing.PlatformInfo
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.symbol.*
 import com.google.devtools.ksp.validate
 import java.io.Writer
+
+
+fun List<PlatformInfo>.getTargetPlatformFromKspOptions(): DrpcTargetEnvironment {
+    return when {
+        this.any { it.platformName.lowercase().contains("android") } -> DrpcTargetEnvironment.Android
+        this.any { it.platformName.lowercase().contains("jvm") } -> DrpcTargetEnvironment.Jvm
+        this.any { it.platformName.lowercase().contains("ios") } -> DrpcTargetEnvironment.Ios
+        this.any { it.platformName.lowercase().contains("macos") } -> DrpcTargetEnvironment.Macos
+        else -> error("Drpc processor could not determine target platform. Current platforms: ${this.map { it.platformName }}")
+    }
+}
 
 
 /**
@@ -86,7 +99,7 @@ fun Writer.writePackageAndImports(packageName: String, imports: Set<String>) {
     appendLine()
 
     val all = imports
-        .filterNot { it.substringBeforeLast(".") == packageName }
+//        .filterNot { it.substringBeforeLast(".") == packageName }
         .sorted()
 
     all.forEach { appendLine("import $it") }

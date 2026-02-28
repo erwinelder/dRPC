@@ -1,6 +1,7 @@
 package com.docta.drpc.processor
 
 import com.docta.drpc.processor.client.RpcClientGenerator
+import com.docta.drpc.processor.core.DrpcTargetEnvironment
 import com.docta.drpc.processor.core.RpcCoreGenerator
 import com.docta.drpc.processor.core.model.ServiceMetadata
 import com.docta.drpc.processor.core.utils.getRpcServices
@@ -14,7 +15,8 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 
 class RpcProcessor(
-    private val codeGenerator: CodeGenerator
+    private val codeGenerator: CodeGenerator,
+    private val targetEnvironment: DrpcTargetEnvironment
 ) : SymbolProcessor {
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
@@ -22,6 +24,11 @@ class RpcProcessor(
 
         services.forEach { it.generateCode() }
 
+        RpcClientGenerator.generateClientFactoryRegistry(
+            codeGenerator = codeGenerator,
+            targetEnvironment = targetEnvironment,
+            services = services
+        )
         RpcServerGenerator.generateInstaller(
             codeGenerator = codeGenerator,
             services = services
@@ -46,6 +53,11 @@ class RpcProcessor(
             codeGenerator = codeGenerator,
             serviceMetadata = serviceMetadata,
             functions = functions,
+            dependencies = dependencies
+        )
+        RpcClientGenerator.generateRpcClientFactory(
+            codeGenerator = codeGenerator,
+            serviceMetadata = serviceMetadata,
             dependencies = dependencies
         )
 

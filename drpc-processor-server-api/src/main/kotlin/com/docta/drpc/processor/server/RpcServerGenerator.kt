@@ -81,7 +81,7 @@ object RpcServerGenerator {
         val containingFiles = mutableListOf<KSFile>()
 
         services.forEach { service ->
-            val metadata = ServiceMetadata.Companion.fromService(service = service)
+            val metadata = ServiceMetadata.fromService(service = service)
             servicesMetadata.add(metadata)
             service.containingFile?.let { containingFiles.add(it) }
         }

@@ -12,6 +12,10 @@ sealed interface SimpleResult<out E> {
     data class Error<out E>(val error: E): SimpleResult<E>
 
 
+    fun isSuccess(): Boolean = this is Success
+    fun isError(): Boolean = this is Error
+
+
     fun getErrorOrNull(): E? = (this as? Error)?.error
 
 
@@ -25,7 +29,7 @@ sealed interface SimpleResult<out E> {
     }
 
 
-    fun fold(
+    fun onEach(
         onSuccess: () -> Unit,
         onError: (E) -> Unit
     ): SimpleResult<E> {
@@ -41,7 +45,7 @@ sealed interface SimpleResult<out E> {
         }
     }
 
-    suspend fun foldSuspended(
+    suspend fun onEachSuspend(
         onSuccess: suspend () -> Unit,
         onError: suspend (E) -> Unit
     ): SimpleResult<E> {

@@ -22,13 +22,13 @@ dRPC is published on Maven Central, so you can add it as a dependency in your pr
 ```kotlin
 dependencies {
     // For both client and server APIs:
-    implementation("io.github.erwinelder:drpc:0.4.0")
-    ksp("io.github.erwinelder:drpc-processor:0.4.0")
+    implementation("io.github.erwinelder:drpc:0.4.3")
+    ksp("io.github.erwinelder:drpc-processor:0.4.3")
     // For client API only:
-    implementation("io.github.erwinelder:drpc-client:0.4.0")
+    implementation("io.github.erwinelder:drpc-client:0.4.3")
     ksp("io.github.erwinelder:drpc-client-processor:0.4:0")
     // For server API only:
-    implementation("io.github.erwinelder:drpc-server:0.4.0")
+    implementation("io.github.erwinelder:drpc-server:0.4.3")
     ksp("io.github.erwinelder:drpc-server-processor:0.4:0")
 }
 ```
@@ -36,7 +36,7 @@ dependencies {
 ### Gradle (version catalog)
 ```gradle
 [versions]
-drpc-version = "0.4.0"
+drpc-version = "0.4.3"
 
 [libraries]
 # For both client and server APIs:
@@ -76,11 +76,11 @@ sealed class AuthError {
     @Serializable object TokenExpired : AuthError()
 }
 
-// Annotate the service interface with @Rpc and specify the base HTTP URL for the service (essential)
-@Rpc(serviceBaseHttpUrl = "http://0.0.0.0:8080")
+// Annotate the service interface with `@Rpc` (essential)
+@Rpc
 interface AuthService {
     
-    // Use context receiver for each method to get access to dRPC context in service methods (essential)
+    // Use context parameters for each method to get access to dRPC context in service methods (essential)
     context(ctx: DrpcContext)
     suspend fun health(): SimpleResult<AuthError>
     
@@ -96,10 +96,22 @@ interface AuthService {
 ### Calling from the client side
 
 ```kotlin
+// Get Ktor's HttpClient with JSON serialization configured
+val httpClient = HttpClient(CIO) {
+    install(ContentNegotiation) {
+        json()
+    }
+}
+// Create a dRPC client for the AuthService interface, providing the base URL of the server and the configured HttpClient
+val authClient = rpcClient<AuthService>(
+    baseHttpUrl = "http://0.0.0.0:8080",
+    httpClient = httpClient
+)
+
 fun getUserData(username: String, password: String): ResultData<User, AuthError> {
     // Sign-in to get user data (get user object with success or return error)
     val user = callCatching {
-        authService.login(username = "username", password = "password")
+        authClient.login(username = "username", password = "password")
     }
         .getOrElse { return ResultData.Error(AuthError.ServiceNotAvailable) } // extract ResultData from Kotlin Result or return ServiceNotAvailable error
         .getOrElse { return ResultData.Error(it) } // extract User from ResultData or return error
@@ -110,7 +122,7 @@ fun getUserData(username: String, password: String): ResultData<User, AuthError>
 fun getUserData(username: String, password: String): User {
     // Sign-in to get user data (get user object with success or return error)
     val user = callCatching {
-        authService.login(username = "username", password = "password")
+        authClient.login(username = "username", password = "password")
     }
         .getOrElse { throw Exception("Auth service is not available") } // extract ResultData from Kotlin Result or throw an exception
         .getOrElse { throw Exception("Server error: $it") } // extract User from ResultData or return throw an exception
@@ -121,7 +133,7 @@ fun getUserData(username: String, password: String): User {
 fun verifyUserToken(token: String): Boolean {
     // Verify token (return false if error is present)
     callCatching {
-        authService.verifyToken(token = token)
+        authClient.verifyToken(token = token)
     }
         .getOrElse { return false } // extract SimpleResult from Kotlin Result or return false
         .onError { return false } // return false if error is present
@@ -132,7 +144,7 @@ fun verifyUserToken(token: String): Boolean {
 fun checkAuthServiceHealth(): Boolean {
     // Check if auth service is healthy (return false if error is present)
     callCatching {
-        authService.health()
+        authClient.health()
     }
         .getOrElse { return false } // extract SimpleResult from Kotlin Result or return false
         .onError { return false } // return false if error is present

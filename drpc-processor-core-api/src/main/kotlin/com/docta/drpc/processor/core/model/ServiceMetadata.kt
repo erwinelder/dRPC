@@ -10,7 +10,9 @@ data class ServiceMetadata(
     val controllerName: String,
     val controllerQualifiedName: String = "$packageName.$controllerName",
     val binderName: String,
-    val binderQualifiedName: String = "$packageName.$binderName"
+    val binderQualifiedName: String = "$packageName.$binderName",
+    val clientFactoryName: String,
+    val clientFactoryQualifiedName: String = "$packageName.$clientFactoryName"
 ) {
     companion object {
 
@@ -22,6 +24,7 @@ data class ServiceMetadata(
             val baseName = serviceName.removeSuffix("Service")
             val controllerName = "${baseName}RestController"
             val binderName = "${serviceName}Binder"
+            val clientFactoryName = "${baseName}ClientFactory"
 
             return ServiceMetadata(
                 packageName = packageName,
@@ -29,7 +32,8 @@ data class ServiceMetadata(
                 serviceName = serviceName,
                 serviceQualifiedName = serviceQualifiedName,
                 controllerName = controllerName,
-                binderName = binderName
+                binderName = binderName,
+                clientFactoryName = clientFactoryName
             )
         }
 

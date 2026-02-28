@@ -1,16 +1,18 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.plugin.serialization)
     alias(libs.plugins.ksp)
 }
 
 dependencies {
     implementation(project(":drpc"))
-//    implementation(project(":drpc-core"))
 //    implementation(project(":drpc-client"))
 //    implementation(project(":drpc-server"))
     ksp(project(":drpc-processor"))
+//    ksp(project(":drpc-processor-client"))
+//    ksp(project(":drpc-processor-server"))
 
     // Ktor Server
     implementation(libs.ktor.server.core)
@@ -26,9 +28,13 @@ dependencies {
     // Koin
     implementation(libs.koin.ktor)
     implementation(libs.koin.logger.slf4j)
+    // Test
+    testImplementation(kotlin("test"))
+    testImplementation(libs.ktor.server.test.host)
 }
 
-val compileKotlin: KotlinCompile by tasks
-compileKotlin.compilerOptions {
-    freeCompilerArgs.set(listOf("-Xcontext-parameters"))
+tasks.withType<KotlinCompilationTask<*>>().configureEach {
+    compilerOptions {
+        freeCompilerArgs.add("-Xcontext-parameters")
+    }
 }

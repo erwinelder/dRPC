@@ -22,6 +22,5 @@ fun Application.appModule() {
     configureSerialization()
     configureDI(mainModule)
     installDrpc()
-
     configureRouting()
 }

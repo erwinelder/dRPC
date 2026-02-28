@@ -1,12 +1,12 @@
 package com.docta.drpc.test.di
 
+import com.docta.drpc.client.rpcClient
 import com.docta.drpc.core.network.HttpClientType
-import com.docta.drpc.test.domain.service.TestRestControllerImpl
 import com.docta.drpc.test.domain.service.TestService
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.serialization.kotlinx.json.json
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
@@ -25,9 +25,9 @@ val mainModule = module {
 
     /* ---------- Services ---------- */
 
-    single<TestService> {
-        TestRestControllerImpl(
-            serviceBaseHttpUrl = "http://0.0.0.0:8080",
+    single {
+        rpcClient<TestService>(
+            baseHttpUrl = "http://0.0.0.0:8080",
             httpClient = get(qualifier = named(enum = HttpClientType.Http))
         )
     }

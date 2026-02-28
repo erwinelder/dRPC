@@ -12,6 +12,10 @@ sealed interface ResultData<out D, out E> {
     data class Error<out D, out E>(val error: E): ResultData<D, E>
 
 
+    fun isSuccess(): Boolean = this is Success
+    fun isError(): Boolean = this is Error
+
+
     fun getDataOrNull(): D? = (this as? Success)?.data
     fun getErrorOrNull(): E? = (this as? Error)?.error
 
@@ -41,13 +45,29 @@ sealed interface ResultData<out D, out E> {
     }
 
 
-    fun fold(
+    fun onEach(
         onSuccess: (D) -> Unit,
         onError: (E) -> Unit
     ): ResultData<D, E> {
         return when (this) {
             is Success -> {
                 onSuccess(data)
+                this
+            }
+            is Error -> {
+                onError(error)
+                this
+            }
+        }
+    }
+
+    suspend fun onEachSuspend(
+        onSuccess: suspend () -> Unit,
+        onError: suspend (E) -> Unit
+    ): ResultData<D, E> {
+        return when (this) {
+            is Success -> {
+                onSuccess()
                 this
             }
             is Error -> {

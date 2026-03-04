@@ -20,23 +20,27 @@ dRPC is published on Maven Central, so you can add it as a dependency in your pr
 
 ### Gradle
 ```kotlin
+plugins {
+    id("io.github.erwinelder.drpc.shadow") version "0.4.7"
+}
+
 dependencies {
     // For both client and server APIs:
-    implementation("io.github.erwinelder:drpc:0.4.6")
-    ksp("io.github.erwinelder:drpc-processor:0.4.6")
+    implementation("io.github.erwinelder:drpc:0.4.7")
+    ksp("io.github.erwinelder:drpc-processor:0.4.7")
     // For client API only:
-    implementation("io.github.erwinelder:drpc-client:0.4.6")
-    ksp("io.github.erwinelder:drpc-client-processor:0.4:6")
+    implementation("io.github.erwinelder:drpc-client:0.4.7")
+    ksp("io.github.erwinelder:drpc-client-processor:0.4.7")
     // For server API only:
-    implementation("io.github.erwinelder:drpc-server:0.4.6")
-    ksp("io.github.erwinelder:drpc-server-processor:0.4:6")
+    implementation("io.github.erwinelder:drpc-server:0.4.7")
+    ksp("io.github.erwinelder:drpc-server-processor:0.4.7")
 }
 ```
 
 ### Gradle (version catalog)
 ```gradle
 [versions]
-drpc-version = "0.4.6"
+drpc-version = "0.4.7"
 
 [libraries]
 # For both client and server APIs:
@@ -48,8 +52,15 @@ drpc-client-processor = { module = "io.github.erwinelder:drpc-client-processor",
 # For server API only:
 drpc-server = { module = "io.github.erwinelder:drpc-server", version.ref = "drpc-version" }
 drpc-server-processor = { module = "io.github.erwinelder:drpc-server-processor", version.ref = "drpc-version" }
+
+[plugins]
+drpc-shadow = { id = "io.github.erwinelder.drpc.shadow", version.ref = "drpc-version" }
 ```
 ```kotlin
+plugins {
+    alias(libs.plugins.drpc.shadow)
+}
+
 dependencies {
     // For both client and server APIs:
     implementation(libs.drpc)

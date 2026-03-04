@@ -17,6 +17,7 @@ android-gradle-plugin = "8.13.2"
 vanniktech-maven-publish = "0.35.0"
 ksp = "2.3.6"
 compose-plugin = "1.9.3"
+shadow-plugin = "8.1.1"
 
 [libraries]
 # Ktor Server
@@ -39,6 +40,7 @@ koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin-version" 
 # Utilities
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback-version" }
 ksp-symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
+shadow-plugin = { module = "com.github.johnrengelman:shadow", version.ref = "shadow-plugin" }
 # Testing
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor-version" }
 

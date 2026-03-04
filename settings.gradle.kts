@@ -27,6 +27,8 @@ include(":drpc-processor")
 include(":drpc-processor-client")
 include(":drpc-processor-server")
 
+include(":drpc-gradle-plugin")
+
 include(":sample-client")
 include(":sample-server")
 include(":sample1-server")

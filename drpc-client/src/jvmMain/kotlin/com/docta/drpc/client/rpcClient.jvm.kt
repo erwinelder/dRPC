@@ -10,7 +10,10 @@ actual fun tryLoadGeneratedClientFactoryRegistry() {
 
     synchronized(DrpcClientFactoryRegistry) {
         if (installed) return
-        ServiceLoader.load(DrpcClientFactoryRegistryProvider::class.java).forEach { it.install() }
+        ServiceLoader.load(
+            DrpcClientFactoryRegistryProvider::class.java,
+            DrpcClientFactoryRegistryProvider::class.java.classLoader
+        ).forEach { it.install() }
         installed = true
     }
 }

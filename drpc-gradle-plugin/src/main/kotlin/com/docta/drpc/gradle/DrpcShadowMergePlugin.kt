@@ -103,7 +103,7 @@ class DrpcShadowMergePlugin : Plugin<Project> {
 
     private fun resolveRuntimeClasspathUrls(project: Project): List<URL> {
         // JVM projects: main runtimeClasspath is a good source for service descriptors.
-        val cp = project.configurations.findByName("runtimeClasspath")?.resolvedConfiguration?.files.orEmpty()
+        val cp = project.configurations.findByName("runtimeClasspath")?.resolve().orEmpty()
         return cp.map { it.toURI().toURL() }
     }
 

@@ -3,7 +3,12 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.plugin.serialization)
+    alias(libs.plugins.ktor)
     alias(libs.plugins.ksp)
+}
+
+application {
+    mainClass = "com.docta.drpc.sample2.ApplicationKt"
 }
 
 dependencies {

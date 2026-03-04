@@ -8,7 +8,7 @@ private var installed = false
 actual fun tryLoadGeneratedClientFactoryRegistry() {
     if (installed) return
 
-    synchronized(DrpcClientFactories) {
+    synchronized(DrpcClientFactoryRegistry) {
         if (installed) return
         ServiceLoader.load(DrpcClientFactoryRegistryProvider::class.java).forEach { it.install() }
         installed = true

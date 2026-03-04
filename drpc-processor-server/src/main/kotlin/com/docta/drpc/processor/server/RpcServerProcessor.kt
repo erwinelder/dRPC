@@ -20,7 +20,7 @@ class RpcServerProcessor(
 
         services.forEach { it.generateCode() }
 
-        RpcServerGenerator.generateInstaller(
+        RpcServerGenerator.generateBinderRegistries(
             codeGenerator = codeGenerator,
             services = services
         )

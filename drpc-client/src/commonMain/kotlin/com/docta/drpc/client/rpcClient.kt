@@ -22,7 +22,7 @@ inline fun <reified S : Any> rpcClient(
     tryLoadGeneratedClientFactoryRegistry()
 
     @Suppress("UNCHECKED_CAST")
-    val factory = DrpcClientFactories.map[S::class] as? DrpcClientFactory<S>
+    val factory = DrpcClientFactoryRegistry.map[S::class] as? DrpcClientFactory<S>
         ?: error("No dRPC client factory registered for service ${S::class.qualifiedName}. " +
                 "Ensure you applied `drpc-processor` or `drpc-processor-client` via KSP and that the service interface is annotated with @Rpc.")
     return factory.create(baseHttpUrl = baseHttpUrl, httpClient = httpClient)

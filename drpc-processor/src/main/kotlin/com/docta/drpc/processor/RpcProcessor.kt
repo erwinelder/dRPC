@@ -24,12 +24,12 @@ class RpcProcessor(
 
         services.forEach { it.generateCode() }
 
-        RpcClientGenerator.generateClientFactoryRegistry(
+        RpcClientGenerator.generateClientFactoryRegistries(
             codeGenerator = codeGenerator,
             targetEnvironment = targetEnvironment,
             services = services
         )
-        RpcServerGenerator.generateInstaller(
+        RpcServerGenerator.generateBinderRegistries(
             codeGenerator = codeGenerator,
             services = services
         )

@@ -22,7 +22,7 @@ class RpcClientProcessor(
 
         services.forEach { it.generateCode() }
 
-        RpcClientGenerator.generateClientFactoryRegistry(
+        RpcClientGenerator.generateClientFactoryRegistries(
             codeGenerator = codeGenerator,
             targetEnvironment = targetEnvironment,
             services = services

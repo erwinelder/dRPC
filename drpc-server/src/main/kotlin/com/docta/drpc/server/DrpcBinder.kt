@@ -1,8 +1,8 @@
-package com.docta.drpc.server.service
+package com.docta.drpc.server
 
 import io.ktor.server.routing.Routing
 
-interface RpcBinder<S : Any> {
+interface DrpcBinder<S : Any> {
 
     fun bind(routing: Routing, service: S)
 

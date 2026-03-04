@@ -1,6 +1,7 @@
 package com.docta.drpc.processor.server
 
 import com.docta.drpc.processor.core.model.ServiceMetadata
+import com.docta.drpc.processor.core.utils.getPackagePrefix
 import com.docta.drpc.processor.core.utils.writePackageAndImports
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
@@ -21,7 +22,7 @@ object RpcServerGenerator {
             "io.ktor.server.routing.Routing",
             "io.ktor.server.routing.route",
             "com.docta.drpc.server.network.processPostRoute",
-            "com.docta.drpc.server.service.RpcBinder",
+            "com.docta.drpc.server.DrpcBinder",
             serviceMetadata.serviceQualifiedName,
             serviceMetadata.controllerQualifiedName
         )
@@ -35,7 +36,7 @@ object RpcServerGenerator {
         out.writer().use { w ->
             w.writePackageAndImports(packageName = serviceMetadata.packageName, imports = imports)
 
-            w.appendLine("class ${serviceMetadata.binderName} : RpcBinder<${serviceMetadata.serviceName}> {")
+            w.appendLine("class ${serviceMetadata.binderName} : DrpcBinder<${serviceMetadata.serviceName}> {")
             w.appendLine()
             w.appendLine("    override fun bind(routing: Routing, service: ${serviceMetadata.serviceName}) {")
             w.appendLine("        routing.route(\"/${serviceMetadata.baseName}\") {")
@@ -71,12 +72,10 @@ object RpcServerGenerator {
     }
 
 
-    fun generateInstaller(
+    fun generateBinderRegistries(
         codeGenerator: CodeGenerator,
         services: List<KSClassDeclaration>
     ) {
-        val installerPackage = "com.docta.drpc.server"
-
         val servicesMetadata = mutableListOf<ServiceMetadata>()
         val containingFiles = mutableListOf<KSFile>()
 
@@ -86,30 +85,31 @@ object RpcServerGenerator {
             service.containingFile?.let { containingFiles.add(it) }
         }
 
-        generateInstaller(
+        generateBinderRegistries(
             codeGenerator = codeGenerator,
-            installerPackage = installerPackage,
-            services = servicesMetadata,
+            servicesMetadata = servicesMetadata,
             containingFiles = containingFiles
         )
     }
 
-    fun generateInstaller(
+    fun generateBinderRegistries(
         codeGenerator: CodeGenerator,
-        installerPackage: String,
-        services: List<ServiceMetadata>,
+        servicesMetadata: List<ServiceMetadata>,
         containingFiles: List<KSFile>
     ) {
-        if (services.isEmpty()) return
+        if (servicesMetadata.isEmpty()) return
 
-        val installerFileName = "DrpcInstallerGenerated"
+        val installerPackagePrefix = servicesMetadata.getPackagePrefix()
+            ?: "com.docta.drpc.client"
+        val installerPackage = "$installerPackagePrefix.drpc.generated"
 
-        val imports = services.flatMap { service ->
+        val installerFileName = "DrpcBinderRegistryProviderGenerated"
+
+        val imports = servicesMetadata.flatMap { service ->
             setOf(
                 "io.ktor.server.application.Application",
-                "com.docta.drpc.server.DrpcInstaller",
-                "com.docta.drpc.server.DrpcInstallerHolder",
-                "com.docta.drpc.server.service.RpcRegistry",
+                "com.docta.drpc.server.DrpcBinderRegistryProvider",
+                "com.docta.drpc.server.DrpcBinderRegistry",
                 service.serviceQualifiedName,
                 service.binderQualifiedName
             )
@@ -129,20 +129,50 @@ object RpcServerGenerator {
         out.writer().use { w ->
             w.writePackageAndImports(packageName = installerPackage, imports = imports)
 
-            w.appendLine("object DrpcInstallerGenerated : DrpcInstaller {")
-            w.appendLine()
-            w.appendLine("    init {")
-            w.appendLine("        DrpcInstallerHolder.installer = this")
-            w.appendLine("    }")
+            w.appendLine("@Suppress(\"unused\")")
+            w.appendLine("class DrpcBinderRegistryProviderGenerated : DrpcBinderRegistryProvider {")
             w.appendLine()
             w.appendLine("    override fun install(application: Application) {")
-            services.forEach { s ->
-                w.appendLine("        RpcRegistry.binders[${s.serviceName}::class] =")
-                w.appendLine("            ${s.binderName}()")
+            servicesMetadata.forEach { s ->
+                w.appendLine("        DrpcBinderRegistry.register(")
+                w.appendLine("            service = ${s.serviceName}::class,")
+                w.appendLine("            binder = ${s.binderName}()")
+                w.appendLine("        )")
             }
             w.appendLine("    }")
             w.appendLine()
             w.appendLine("}")
+        }
+
+        generateInstallerProviderResource(
+            codeGenerator = codeGenerator,
+            containingFiles = containingFiles,
+            providerFqn = "$installerPackage.$installerFileName"
+        )
+    }
+
+    private fun generateInstallerProviderResource(
+        codeGenerator: CodeGenerator,
+        containingFiles: List<KSFile>,
+        providerFqn: String
+    ) {
+        val dependencies = Dependencies(
+            aggregating = true,
+            sources = containingFiles.distinct().toTypedArray()
+        )
+        val registryFqn = "com.docta.drpc.server.DrpcBinderRegistryProvider"
+        val serviceFilePath = "META-INF/services/$registryFqn"
+
+        val file = runCatching {
+            codeGenerator.createNewFileByPath(
+                dependencies = dependencies,
+                path = serviceFilePath,
+                extensionName = ""
+            )
+        }.getOrNull() ?: return // If the file already exists, we can assume it's identical and skip writing it again
+
+        file.writer().use { w ->
+            w.appendLine(providerFqn)
         }
     }
 

@@ -2,7 +2,7 @@ package com.docta.drpc.server
 
 import io.ktor.server.application.Application
 
-fun interface DrpcInstaller {
+interface DrpcBinderRegistryProvider {
 
     fun install(application: Application)
 

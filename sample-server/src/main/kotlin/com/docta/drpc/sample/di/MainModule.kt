@@ -2,7 +2,8 @@ package com.docta.drpc.sample.di
 
 import com.docta.drpc.client.rpcClient
 import com.docta.drpc.core.network.HttpClientType
-import com.docta.drpc.sample.domain.service.TestService
+import com.docta.drpc.sample1.domain.service.Test1Service
+import com.docta.drpc.sample2.domain.service.Test2Service
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -26,7 +27,14 @@ val mainModule = module {
     /* ---------- Services ---------- */
 
     single {
-        rpcClient<TestService>(
+        rpcClient<Test1Service>(
+            baseHttpUrl = "http://0.0.0.0:8080",
+            httpClient = get(qualifier = named(enum = HttpClientType.Http))
+        )
+    }
+
+    single {
+        rpcClient<Test2Service>(
             baseHttpUrl = "http://0.0.0.0:8080",
             httpClient = get(qualifier = named(enum = HttpClientType.Http))
         )

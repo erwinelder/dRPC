@@ -1,6 +1,6 @@
 package com.docta.drpc.sample2.presentation.routing
 
-import com.docta.drpc.server.service.registerService
+import com.docta.drpc.server.registerService
 import com.docta.drpc.sample2.domain.service.Test2Service
 import com.docta.drpc.sample2.domain.service.Test2ServiceImpl
 import io.ktor.server.application.*

@@ -2,6 +2,7 @@ package com.docta.drpc.processor.core.utils
 
 import com.docta.drpc.core.annotation.Rpc
 import com.docta.drpc.processor.core.DrpcTargetEnvironment
+import com.docta.drpc.processor.core.model.ServiceMetadata
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.PlatformInfo
 import com.google.devtools.ksp.processing.Resolver
@@ -49,6 +50,17 @@ fun KSClassDeclaration.getServiceFunctions(): List<KSFunctionDeclaration> {
         .filter { it.isAbstract }
         .filter { it.simpleName.asString() !in setOf("equals", "hashCode", "toString") }
         .toList()
+}
+
+
+fun List<ServiceMetadata>.getPackagePrefix(): String? {
+    return this
+        .map { it.packageName }
+        .reduceOrNull { acc, string ->
+            if (acc == string) acc else acc.take(acc.commonPrefixWith(string).length)
+        }
+        ?.removeSuffix(".")
+        ?.takeIf { it.isNotBlank() }
 }
 
 

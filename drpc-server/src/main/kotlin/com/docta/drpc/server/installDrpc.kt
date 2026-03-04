@@ -1,6 +1,7 @@
 package com.docta.drpc.server
 
 import io.ktor.server.application.Application
+import java.util.*
 
 /**
  * Installs the dRPC server framework into the Ktor [Application]. It allows to register dRPC services to handle
@@ -10,17 +11,8 @@ import io.ktor.server.application.Application
  * `drpc-processor` or `drpc-processor-server` KSP processor in this module.
  */
 fun Application.installDrpc() {
-    tryLoadGeneratedInstaller()
-
-    DrpcInstallerHolder.installer?.install(this)
-        ?: error(
-            "dRPC installer was not found.\n" +
-                    "Make sure you applied 'drpc-processor-server' or 'drpc-processor' via KSP in this module and rebuild."
-        )
-}
-
-private fun tryLoadGeneratedInstaller() {
-    if (DrpcInstallerHolder.installer != null) return
-    val fqn = "com.docta.drpc.server.DrpcInstallerGenerated"
-    runCatching { Class.forName(fqn) }
+    synchronized(DrpcBinderRegistry) {
+        val loader = DrpcBinderRegistryProvider::class.java.classLoader
+        ServiceLoader.load(DrpcBinderRegistryProvider::class.java, loader).forEach { it.install(this) }
+    }
 }

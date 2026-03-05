@@ -210,6 +210,22 @@ class DrpcShadowMergePlugin : Plugin<Project> {
             }
         }
 
+        // Keep only the merged dRPC service descriptors from `outDir`.
+        val outDirPrefix = outDir.absolutePath + File.separator
+        jar.eachFile { details ->
+            val relPath = details.relativePath.pathString.replace('\\', '/')
+            if (relPath in drpcServiceFiles) {
+                val src = details.file.absolutePath
+                val fromMergedDir = src.startsWith(outDirPrefix)
+                if (!fromMergedDir) {
+                    jar.project.logger.info(
+                        "[dRPC] '${jar.path}': excluding duplicate descriptor '$relPath' from $src"
+                    )
+                    details.exclude()
+                }
+            }
+        }
+
         jar.from(outDir)
         jar.project.logger.lifecycle("[dRPC] '${jar.path}': will include merged dRPC descriptors from ${outDir.absolutePath}")
     }

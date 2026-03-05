@@ -210,9 +210,6 @@ class DrpcShadowMergePlugin : Plugin<Project> {
             }
         }
 
-        // Ensure only the merged descriptors end up in the final jar (avoid duplicates from dependencies)
-        drpcServiceFiles.forEach { jar.exclude(it) }
-
         jar.from(outDir)
         jar.project.logger.lifecycle("[dRPC] '${jar.path}': will include merged dRPC descriptors from ${outDir.absolutePath}")
     }

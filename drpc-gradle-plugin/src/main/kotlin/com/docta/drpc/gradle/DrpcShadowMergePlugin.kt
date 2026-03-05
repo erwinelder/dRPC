@@ -210,14 +210,43 @@ class DrpcShadowMergePlugin : Plugin<Project> {
             }
         }
 
+        // Ensure only the merged descriptors end up in the final jar (avoid duplicates from dependencies)
+        drpcServiceFiles.forEach { jar.exclude(it) }
+
         jar.from(outDir)
         jar.project.logger.lifecycle("[dRPC] '${jar.path}': will include merged dRPC descriptors from ${outDir.absolutePath}")
     }
 
     private fun resolveRuntimeClasspathUrls(project: Project): List<URL> {
-        // JVM projects: main runtimeClasspath is a good source for service descriptors.
-        val cp = project.configurations.findByName("runtimeClasspath")?.resolve().orEmpty()
-        return cp.map { it.toURI().toURL() }
+        // Collect dependency jars/dirs from the most likely runtime classpath configurations.
+        val configNames = listOf(
+            "runtimeClasspath",
+            "jvmRuntimeClasspath",
+        )
+
+        val cpFiles = configNames
+            .asSequence()
+            .mapNotNull { project.configurations.findByName(it) }
+            .firstOrNull()
+            ?.resolve()
+            .orEmpty()
+
+        val urls = mutableListOf<URL>()
+        urls += cpFiles.map { it.toURI().toURL() }
+
+        // Also include this module's own outputs so we can see generated META-INF/services descriptors.
+        val extraDirs = listOf(
+            project.layout.buildDirectory.dir("resources/main").get().asFile,
+            project.layout.buildDirectory.dir("generated/ksp/main/resources").get().asFile,
+            project.layout.buildDirectory.dir("generated/ksp/main/kotlin").get().asFile,
+            project.layout.buildDirectory.dir("classes/kotlin/main").get().asFile,
+        )
+
+        extraDirs
+            .filter { it.exists() }
+            .forEach { urls += it.toURI().toURL() }
+
+        return urls.distinct()
     }
 
     private fun collectServiceFileLines(logger: Logger, classpathUrls: List<URL>, servicePath: String): List<String> {

@@ -15,8 +15,7 @@ fun List<PlatformInfo>.getTargetPlatformFromKspOptions(): DrpcTargetEnvironment 
     return when {
         this.any { it.platformName.lowercase().contains("android") } -> DrpcTargetEnvironment.Android
         this.any { it.platformName.lowercase().contains("jvm") } -> DrpcTargetEnvironment.Jvm
-        this.any { it.platformName.lowercase().contains("ios") } -> DrpcTargetEnvironment.Ios
-        this.any { it.platformName.lowercase().contains("macos") } -> DrpcTargetEnvironment.Macos
+        this.any { it.platformName.lowercase().contains("native") } -> DrpcTargetEnvironment.Native
         else -> error("Drpc processor could not determine target platform. Current platforms: ${this.map { it.platformName }}")
     }
 }

@@ -169,9 +169,9 @@ object RpcClientGenerator {
 
         val imports = servicesMetadata.flatMap { service ->
             setOfNotNull(
-                "kotlin.native.EagerInitialization".takeIf { targetEnvironment == DrpcTargetEnvironment.Ios },
-                "kotlin.OptIn".takeIf { targetEnvironment == DrpcTargetEnvironment.Ios },
-                "kotlin.ExperimentalStdlibApi".takeIf { targetEnvironment == DrpcTargetEnvironment.Ios },
+                "kotlin.native.EagerInitialization".takeIf { targetEnvironment == DrpcTargetEnvironment.Native },
+                "kotlin.OptIn".takeIf { targetEnvironment == DrpcTargetEnvironment.Native },
+                "kotlin.ExperimentalStdlibApi".takeIf { targetEnvironment == DrpcTargetEnvironment.Native },
                 "com.docta.drpc.client.DrpcClientFactoryRegistryProvider",
                 "com.docta.drpc.client.DrpcClientFactoryRegistry",
                 service.serviceQualifiedName,
@@ -209,7 +209,7 @@ object RpcClientGenerator {
                 w.appendLine("}")
                 w.appendLine()
             }
-            if (targetEnvironment == DrpcTargetEnvironment.Ios) {
+            if (targetEnvironment == DrpcTargetEnvironment.Native) {
                 val registerFunName = "__drpcRegisterClientFactories_$installerPackagePrefixSnakeCase"
                 val initValName = "__drpcClientFactoriesInit_$installerPackagePrefixSnakeCase"
                 w.appendLine("@OptIn(ExperimentalStdlibApi::class)")

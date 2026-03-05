@@ -5,7 +5,10 @@ import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.logging.Logger
+import java.io.File
 import java.net.URL
+import java.util.Collection
+import java.util.jar.JarFile
 
 class DrpcShadowMergePlugin : Plugin<Project> {
 
@@ -81,38 +84,91 @@ class DrpcShadowMergePlugin : Plugin<Project> {
                 return false
             }
 
-        // Set the paths on transformer
-        val setPathsMethod = transformerClass.methods.firstOrNull { m ->
-            m.name == "setPaths" &&
-                    m.parameterCount == 1 &&
-                    java.util.Set::class.java.isAssignableFrom(m.parameterTypes[0])
-        }
+        // Set the paths on transformer (Shadow versions differ: setPaths(Collection), setPaths(Set), or getPaths()+mutate)
+        val pathsSet = servicePaths.toSet()
+        val pathsList = servicePaths.toList()
+
+        val setPathsMethods = transformerClass.methods
+            .filter { m -> m.name == "setPaths" && m.parameterCount == 1 }
+
         logger.info(
-            "[dRPC] '${this.path}': setPaths(Set) method present=${setPathsMethod != null}; " +
-                    "willConfigureVia=${if (setPathsMethod != null) "setPaths" else "field(paths)"}"
+            "[dRPC] '${this.path}': setPaths(any) methods found=${setPathsMethods.size}; " +
+                    "willTryInvokeWith=Set then List"
         )
 
-        val pathsSetOk = when {
-            setPathsMethod != null -> runCatching {
-                setPathsMethod.invoke(transformer, servicePaths)
-            }.isSuccess
-
-            else -> {
-                // Try writing field / Kotlin property backing field if present
-                val field = transformerClass.declaredFields.firstOrNull { it.name == "paths" }
-                if (field != null) {
-                    runCatching {
-                        field.isAccessible = true
-                        field.set(transformer, servicePaths)
-                    }.isSuccess
-                } else false
+        fun tryInvokeSetPaths(arg: Any): Boolean {
+            for (m in setPathsMethods) {
+                val ok = runCatching { m.invoke(transformer, arg) }.isSuccess
+                if (ok) {
+                    logger.info(
+                        "[dRPC] '${this.path}': configured ServiceFileTransformer via ${m.name}(${m.parameterTypes[0].name})"
+                    )
+                    return true
+                }
             }
-        }
-        if (!pathsSetOk) {
-            logger.info("[dRPC] '${this.path}': failed to set ServiceFileTransformer.paths; aborting Shadow config")
             return false
         }
-        logger.info("[dRPC] '${this.path}': configured ServiceFileTransformer.paths successfully")
+
+        var pathsSetOk: Boolean
+
+        // Strategy A: invoke any setPaths(X) with Set or List
+        pathsSetOk = tryInvokeSetPaths(pathsSet) || tryInvokeSetPaths(pathsList)
+
+        // Strategy B: getPaths()+mutate if available
+        if (!pathsSetOk) {
+            val getPathsMethod = transformerClass.methods.firstOrNull { m ->
+                (m.name == "getPaths" || m.name == "paths") && m.parameterCount == 0
+            }
+
+            if (getPathsMethod != null) {
+                val current = runCatching { getPathsMethod.invoke(transformer) }.getOrNull()
+                val mutated = when (current) {
+                    is MutableCollection<*> -> {
+                        @Suppress("UNCHECKED_CAST")
+                        (current as MutableCollection<String>).addAll(pathsSet)
+                    }
+                    is Collection<*> -> {
+                        // Might be mutable even if typed as Collection
+                        runCatching {
+                            @Suppress("UNCHECKED_CAST")
+                            (current as Collection<String>).addAll(pathsSet)
+                        }.getOrDefault(false)
+                    }
+                    else -> false
+                }
+
+                if (mutated) {
+                    logger.info("[dRPC] '${this.path}': configured ServiceFileTransformer by mutating getPaths() collection")
+                    pathsSetOk = true
+                } else {
+                    logger.info("[dRPC] '${this.path}': getPaths() present but not mutable/compatible (type=${current?.javaClass?.name})")
+                }
+            } else {
+                logger.info("[dRPC] '${this.path}': no getPaths()/paths() accessor found for mutation")
+            }
+        }
+
+        // Strategy C: last resort – try writing field named 'paths'
+        if (!pathsSetOk) {
+            val field = transformerClass.declaredFields.firstOrNull { it.name == "paths" }
+            if (field != null) {
+                pathsSetOk = runCatching {
+                    field.isAccessible = true
+                    field.set(transformer, pathsSet)
+                }.isSuccess
+
+                if (pathsSetOk) {
+                    logger.info("[dRPC] '${this.path}': configured ServiceFileTransformer via field(paths)")
+                }
+            }
+        }
+
+        if (!pathsSetOk) {
+            logger.info("[dRPC] '${this.path}': failed to set ServiceFileTransformer paths via all strategies; aborting Shadow config")
+            return false
+        }
+
+        logger.info("[dRPC] '${this.path}': configured ServiceFileTransformer paths successfully")
 
         val installed = runCatching { transformMethod.invoke(this, transformer) }.isSuccess
         logger.info("[dRPC] '${this.path}': installed ServiceFileTransformer into task: $installed")
@@ -169,7 +225,7 @@ class DrpcShadowMergePlugin : Plugin<Project> {
 
         for (url in classpathUrls) {
             // Handle both directories and jars
-            val file = runCatching { java.io.File(url.toURI()) }.getOrNull() ?: continue
+            val file = runCatching { File(url.toURI()) }.getOrNull() ?: continue
             if (file.isDirectory) {
                 val candidate = file.resolve(servicePath)
                 if (candidate.isFile) {
@@ -177,7 +233,7 @@ class DrpcShadowMergePlugin : Plugin<Project> {
                     addLines(text = candidate.readText(Charsets.UTF_8), seen = seen)
                 }
             } else if (file.isFile && file.extension == "jar") {
-                java.util.jar.JarFile(file).use { jar ->
+                JarFile(file).use { jar ->
                     val entry = jar.getJarEntry(servicePath) ?: return@use
                     logger.info("[dRPC] found $servicePath in jar: ${file.absolutePath}")
                     jar.getInputStream(entry).use { input ->

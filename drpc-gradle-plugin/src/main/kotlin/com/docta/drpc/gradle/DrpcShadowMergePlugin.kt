@@ -4,7 +4,6 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.bundling.Jar
-import org.gradle.api.logging.Logger
 import java.io.File
 import java.net.URL
 import java.util.Collection
@@ -23,44 +22,20 @@ class DrpcShadowMergePlugin : Plugin<Project> {
         tasks.withType(Jar::class.java).configureEach { jar ->
             if (jar.name !in jarTaskNames) return@configureEach
 
-            jar.project.logger.lifecycle(
-                "[dRPC] Configuring fat jar task '${jar.path}' (type=${jar::class.java.name}). " +
-                        "Will merge only: ${drpcServiceFiles.joinToString()}"
-            )
-
             jar.duplicatesStrategy = DuplicatesStrategy.INCLUDE
 
             val shadowConfigured = jar.tryConfigureShadowOnlyDrpcServiceMerge(drpcServiceFiles)
-            jar.project.logger.lifecycle(
-                "[dRPC] Task '${jar.path}': shadow-transformer-configured=$shadowConfigured"
-            )
-            if (shadowConfigured) {
-                jar.project.logger.lifecycle(
-                    "[dRPC] Task '${jar.path}': using Shadow ServiceFileTransformer (restricted to dRPC descriptors)."
-                )
-                return@configureEach
-            }
-
-            jar.project.logger.lifecycle(
-                "[dRPC] Task '${jar.path}': Shadow transformer not available; falling back to manual merge for dRPC descriptors."
-            )
+            if (shadowConfigured) return@configureEach
 
             configureManualDrpcServiceMerge(jar = jar)
         }
     }
 
     private fun Jar.tryConfigureShadowOnlyDrpcServiceMerge(servicePaths: Set<String>): Boolean {
-        val logger: Logger = this.project.logger
-        logger.info("[dRPC] '${this.path}': attempting Shadow-only service merge; paths=${servicePaths.joinToString()}")
-
         // Ensure task has "transform(Object)" method (ShadowJar does)
         val transformMethod = this::class.java.methods.firstOrNull { m ->
             m.name == "transform" && m.parameterCount == 1
-        } ?: run {
-            logger.info("[dRPC] '${this.path}': no transform(Object) method found; not a ShadowJar-like task")
-            return false
-        }
-        logger.info("[dRPC] '${this.path}': found transform(Object) method; task looks ShadowJar-like")
+        } ?: return false
 
         // Try to load ServiceFileTransformer class
         val transformerClassNames = listOf(
@@ -70,19 +45,10 @@ class DrpcShadowMergePlugin : Plugin<Project> {
 
         val transformerClass = transformerClassNames.firstNotNullOfOrNull { name ->
             runCatching { Class.forName(name) }.getOrNull()
-        } ?: run {
-            logger.info(
-                "[dRPC] '${this.path}': ServiceFileTransformer class not found (tried: ${transformerClassNames.joinToString()})"
-            )
-            return false
-        }
-        logger.info("[dRPC] '${this.path}': using ServiceFileTransformer=${transformerClass.name}")
+        } ?: return false
 
         val transformer = runCatching { transformerClass.getDeclaredConstructor().newInstance() }.getOrNull()
-            ?: run {
-                logger.info("[dRPC] '${this.path}': failed to instantiate ServiceFileTransformer")
-                return false
-            }
+            ?: return false
 
         // Set the paths on transformer (Shadow versions differ: setPaths(Collection), setPaths(Set), or getPaths()+mutate)
         val pathsSet = servicePaths.toSet()
@@ -91,20 +57,10 @@ class DrpcShadowMergePlugin : Plugin<Project> {
         val setPathsMethods = transformerClass.methods
             .filter { m -> m.name == "setPaths" && m.parameterCount == 1 }
 
-        logger.info(
-            "[dRPC] '${this.path}': setPaths(any) methods found=${setPathsMethods.size}; " +
-                    "willTryInvokeWith=Set then List"
-        )
-
         fun tryInvokeSetPaths(arg: Any): Boolean {
             for (m in setPathsMethods) {
                 val ok = runCatching { m.invoke(transformer, arg) }.isSuccess
-                if (ok) {
-                    logger.info(
-                        "[dRPC] '${this.path}': configured ServiceFileTransformer via ${m.name}(${m.parameterTypes[0].name})"
-                    )
-                    return true
-                }
+                if (ok) return true
             }
             return false
         }
@@ -137,14 +93,7 @@ class DrpcShadowMergePlugin : Plugin<Project> {
                     else -> false
                 }
 
-                if (mutated) {
-                    logger.info("[dRPC] '${this.path}': configured ServiceFileTransformer by mutating getPaths() collection")
-                    pathsSetOk = true
-                } else {
-                    logger.info("[dRPC] '${this.path}': getPaths() present but not mutable/compatible (type=${current?.javaClass?.name})")
-                }
-            } else {
-                logger.info("[dRPC] '${this.path}': no getPaths()/paths() accessor found for mutation")
+                if (mutated) pathsSetOk = true
             }
         }
 
@@ -156,23 +105,12 @@ class DrpcShadowMergePlugin : Plugin<Project> {
                     field.isAccessible = true
                     field.set(transformer, pathsSet)
                 }.isSuccess
-
-                if (pathsSetOk) {
-                    logger.info("[dRPC] '${this.path}': configured ServiceFileTransformer via field(paths)")
-                }
             }
         }
 
-        if (!pathsSetOk) {
-            logger.info("[dRPC] '${this.path}': failed to set ServiceFileTransformer paths via all strategies; aborting Shadow config")
-            return false
-        }
+        if (!pathsSetOk) return false
 
-        logger.info("[dRPC] '${this.path}': configured ServiceFileTransformer paths successfully")
-
-        val installed = runCatching { transformMethod.invoke(this, transformer) }.isSuccess
-        logger.info("[dRPC] '${this.path}': installed ServiceFileTransformer into task: $installed")
-        return installed
+        return runCatching { transformMethod.invoke(this, transformer) }.isSuccess
     }
 
     private fun Project.configureManualDrpcServiceMerge(jar: Jar) {
@@ -181,32 +119,20 @@ class DrpcShadowMergePlugin : Plugin<Project> {
             .get()
             .asFile
 
-        jar.project.logger.info("[dRPC] '${jar.path}': manual merge output dir: ${outDir.absolutePath}")
-
         jar.doFirst {
-            jar.project.logger.lifecycle("[dRPC] '${jar.path}': running manual merge for dRPC ServiceLoader descriptors")
-
             outDir.deleteRecursively()
             outDir.mkdirs()
 
             val urls = resolveRuntimeClasspathUrls(project = project)
-            jar.project.logger.lifecycle("[dRPC] '${jar.path}': classpath roots scanned (count=${urls.size})")
-            urls.take(25).forEach { jar.project.logger.info("[dRPC] '${jar.path}': cp -> $it") }
-            if (urls.size > 25) jar.project.logger.info("[dRPC] '${jar.path}': cp -> ... (${urls.size - 25} more)")
 
             for (servicePath in drpcServiceFiles) {
-                jar.project.logger.lifecycle("[dRPC] '${jar.path}': merging $servicePath")
-                val lines = collectServiceFileLines(logger = jar.project.logger, classpathUrls = urls, servicePath = servicePath)
-                jar.project.logger.lifecycle("[dRPC] '${jar.path}': merged ${lines.size} unique provider lines for $servicePath")
-                lines.take(50).forEach { jar.project.logger.info("[dRPC] '${jar.path}':   $it") }
-                if (lines.size > 50) jar.project.logger.info("[dRPC] '${jar.path}':   ... (${lines.size - 50} more)")
+                val lines = collectServiceFileLines(classpathUrls = urls, servicePath = servicePath)
 
                 if (lines.isEmpty()) continue
 
                 val targetFile = outDir.resolve(servicePath)
                 targetFile.parentFile.mkdirs()
                 targetFile.writeText(lines.joinToString("\n") + "\n", Charsets.UTF_8)
-                jar.project.logger.info("[dRPC] '${jar.path}': wrote merged descriptor -> ${targetFile.absolutePath}")
             }
         }
 
@@ -217,17 +143,11 @@ class DrpcShadowMergePlugin : Plugin<Project> {
             if (relPath in drpcServiceFiles) {
                 val src = details.file.absolutePath
                 val fromMergedDir = src.startsWith(outDirPrefix)
-                if (!fromMergedDir) {
-                    jar.project.logger.info(
-                        "[dRPC] '${jar.path}': excluding duplicate descriptor '$relPath' from $src"
-                    )
-                    details.exclude()
-                }
+                if (!fromMergedDir) details.exclude()
             }
         }
 
         jar.from(outDir)
-        jar.project.logger.lifecycle("[dRPC] '${jar.path}': will include merged dRPC descriptors from ${outDir.absolutePath}")
     }
 
     private fun resolveRuntimeClasspathUrls(project: Project): List<URL> {
@@ -238,9 +158,7 @@ class DrpcShadowMergePlugin : Plugin<Project> {
         )
 
         val cpFiles = configNames
-            .asSequence()
-            .mapNotNull { project.configurations.findByName(it) }
-            .firstOrNull()
+            .firstNotNullOfOrNull { project.configurations.findByName(it) }
             ?.resolve()
             .orEmpty()
 
@@ -262,7 +180,7 @@ class DrpcShadowMergePlugin : Plugin<Project> {
         return urls.distinct()
     }
 
-    private fun collectServiceFileLines(logger: Logger, classpathUrls: List<URL>, servicePath: String): List<String> {
+    private fun collectServiceFileLines(classpathUrls: List<URL>, servicePath: String): List<String> {
         val seen = LinkedHashSet<String>()
 
         for (url in classpathUrls) {
@@ -271,13 +189,11 @@ class DrpcShadowMergePlugin : Plugin<Project> {
             if (file.isDirectory) {
                 val candidate = file.resolve(servicePath)
                 if (candidate.isFile) {
-                    logger.info("[dRPC] found $servicePath in dir: ${candidate.absolutePath}")
                     addLines(text = candidate.readText(Charsets.UTF_8), seen = seen)
                 }
             } else if (file.isFile && file.extension == "jar") {
                 JarFile(file).use { jar ->
                     val entry = jar.getJarEntry(servicePath) ?: return@use
-                    logger.info("[dRPC] found $servicePath in jar: ${file.absolutePath}")
                     jar.getInputStream(entry).use { input ->
                         val text = input.readBytes().toString(Charsets.UTF_8)
                         addLines(text = text, seen = seen)

@@ -222,6 +222,7 @@ object RpcClientGenerator {
                 }
                 w.appendLine("}")
                 w.appendLine()
+                w.appendLine("@kotlin.ExperimentalStdlibApi")
                 w.appendLine("@EagerInitialization")
                 w.appendLine("private val $initValName = run {")
                 w.appendLine("    $registerFunName()")

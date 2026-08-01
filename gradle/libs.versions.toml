@@ -4,18 +4,18 @@ android-minSdk = "24"
 android-compileSdk = "36"
 android-targetSdk = "36"
 # Ktor
-ktor-version = "3.4.0"
+ktor-version = "3.4.1"
 # Koin
 koin-version = "4.1.0"
 # Utilities
-kotlinx-serialization-json-version = "1.9.0"
+kotlinx-serialization-json-version = "1.10.0"
 # Other
-logback-version = "1.5.19"
+logback-version = "1.5.25"
 # Plugins
 kotlin-version = "2.3.10"
 android-gradle-plugin = "8.13.2"
 vanniktech-maven-publish = "0.35.0"
-ksp = "2.3.6"
+ksp = "2.3.10"
 compose-plugin = "1.9.3"
 shadow-plugin = "8.1.1"
 

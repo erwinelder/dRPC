@@ -21,26 +21,26 @@ dRPC is published on Maven Central, so you can add it as a dependency in your pr
 ### Gradle
 ```kotlin
 plugins {
-    id("io.github.erwinelder.drpc.shadow") version "0.4.9"
+    id("io.github.erwinelder.drpc.shadow") version "0.4.10"
 }
 
 dependencies {
     // For both client and server APIs:
-    implementation("io.github.erwinelder:drpc:0.4.9")
-    ksp("io.github.erwinelder:drpc-processor:0.4.9")
+    implementation("io.github.erwinelder:drpc:0.4.10")
+    ksp("io.github.erwinelder:drpc-processor:0.4.10")
     // For client API only:
-    implementation("io.github.erwinelder:drpc-client:0.4.9")
-    ksp("io.github.erwinelder:drpc-client-processor:0.4.9")
+    implementation("io.github.erwinelder:drpc-client:0.4.10")
+    ksp("io.github.erwinelder:drpc-client-processor:0.4.10")
     // For server API only:
-    implementation("io.github.erwinelder:drpc-server:0.4.9")
-    ksp("io.github.erwinelder:drpc-server-processor:0.4.9")
+    implementation("io.github.erwinelder:drpc-server:0.4.10")
+    ksp("io.github.erwinelder:drpc-server-processor:0.4.10")
 }
 ```
 
 ### Gradle (version catalog)
 ```gradle
 [versions]
-drpc-version = "0.4.9"
+drpc-version = "0.4.10"
 
 [libraries]
 # For both client and server APIs:
